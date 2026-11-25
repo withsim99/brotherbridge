@@ -1,18 +1,26 @@
 <div align="center">
-# 🖨️ BrotherBridge
+
+<h2>🖨️ BrotherBridge</h2>
 
 **Breathe new life into your old USB-only Brother printer & scanner using a spare Android phone.**
+
 </div>
+
 *Turn any old Android device + USB OTG cable into a wireless IPP Print Server (`brlaser`) and High-Resolution Network Scanner (`brscan4`).*
+
 <div align="center">
+
 [![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#)
 [![Protocol](https://img.shields.io/badge/Printing-IPP%20Over%20WiFi-0078D4?style=for-the-badge)](#)
 [![Scanner](https://img.shields.io/badge/Scanner-brscan4%20Compatible-orange?style=for-the-badge)](#)
 [![Discovery](https://img.shields.io/badge/Discovery-mDNS%20%2F%20IP-blueviolet?style=for-the-badge)](#)
-</div>
+
+
 [Features](#-key-features) • [How It Works](#-architecture) • [Host Rules](#%EF%B8%8F-host-mode-rules--requirements) • [Screenshots](#-screenshots) • [Compatibility](#-compatibility--expected-devices) • [Setup Guide](#-quick-start-guide) • [HTTP API](#-pc-scanning-http-api)
 
 ---
+
+</div>
 
 ## 🌟 Overview
 
