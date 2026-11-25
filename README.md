@@ -1,6 +1,6 @@
 <div align="center">
 
-<h2>🖨️ BrotherBridge</h2>
+<h2>🖨️ BrotherBridge (Releasing on 27 Nov 2026)</h2>
 
 **Breathe new life into your old USB-only Brother printer & scanner using a spare Android phone.**
 
