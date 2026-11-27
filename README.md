@@ -139,7 +139,7 @@ To ensure reliable, uninterrupted operation as a wireless print and scan server,
 | Home | Print Preview & Controls | Scan Controls | Print Service Plugin |
 | :---: | :---: | :---: | :---: |
 | ![Home](docs/screenshots/host_dashboard.jpg) | ![Print Preview](docs/screenshots/print_preview.jpg) | ![Scan Controls](docs/screenshots/scan_controls.jpg) | ![PrintService Plugin](docs/screenshots/print_service_plugin.jpg) |
-| *USB OTG status, connected clients, IP & mDNS* | *Live sheet preview, N-Up, margins & duplex* | *Up to 2400 DPI, 4-corner crop & auto-adjust* | *Grid/Tiles/List view, merge & PDF export* |
+| *USB OTG status, connected clients, IP & mDNS* | *Live sheet preview, N-Up, margins & duplex* | *Up to 2400 DPI, 4-corner crop & auto-adjust* | *Directly print from any app* |
 
 ---
 
