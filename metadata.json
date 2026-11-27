@@ -1,0 +1,8 @@
+{
+  "name": "Remix BrotherBridge",
+  "description": "Wi-Fi IPP print and scan server with mDNS discovery, N-up page merging, and duplex support for USB OTG Brother printers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
