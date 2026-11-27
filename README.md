@@ -228,7 +228,7 @@ BrotherBridge implements full **IPP 2.0**, HTTP chunked transfer decoding, `Expe
 ### 4. Wireless Scanning from a PC (Desktop Client & API)
 Want a ready-to-use desktop GUI/CLI utility to discover your BrotherBridge host and scan wirelessly from Windows, macOS, or Linux without installing `brscan4`?
 
-> 🔗 **Companion PC Wireless Scan Client:** [https://github.com/your-username/BrotherBridge-PC-Client](https://github.com/your-username/BrotherBridge-PC-Client) *(dummy reference URL — replace with your PC client repository link)*
+> 🔗 **Companion PC Wireless Scan Client:** [@withsim99/BrotherBridge-PC-Client](https://github.com/withsim99/BrotherBridge-PC-Client) *(dummy reference URL — replace with your PC client repository link)*
 
 You can also integrate directly with the Host phone from any script or custom tool using the built-in **HTTP Scan API** below (see [PC_SETUP_AND_SCAN_API.md](PC_SETUP_AND_SCAN_API.md) for the quick reference guide).
 
