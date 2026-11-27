@@ -1,6 +1,15 @@
 <div align="center">
 
-<h2>🖨️ BrotherBridge (v1.9.0)</h2>
+<table align="center">
+  <tr>
+    <td valign="middle">
+      <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" width="42" height="42" alt="BrotherBridge" />
+    </td>
+    <td valign="middle">
+      <strong>BrotherBridge (v1.9.0)</strong>
+    </td>
+  </tr>
+</table>
 
 [![Gemini 4 Neon](https://img.shields.io/badge/Gemini%204%20Neon-18181B?style=for-the-badge&logo=googlegemini&logoColor=FF6B00)](https://aistudio.google.com/docs/models/gemini-4-neon)
 
