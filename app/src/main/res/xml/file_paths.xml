@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <cache-path
+        name="shared_scans"
+        path="shared_scans/" />
+    <files-path
+        name="recent_scans"
+        path="recent_scans/" />
+</paths>

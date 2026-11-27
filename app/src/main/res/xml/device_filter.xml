@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brother Industries (Vendor ID 0x04F9 = 1273), including HL-L2520D / HL-L2320D -->
+    <usb-device vendor-id="1273" />
+    <!-- Generic USB Printer Class (Class 7, Subclass 1) for any standard USB OTG printer -->
+    <usb-device class="7" subclass="1" />
+</resources>
