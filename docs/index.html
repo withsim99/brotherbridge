@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrotherBridge v1.9.0 — Turn a Spare Android Phone into a Wi-Fi Print & Scan Server</title>
+
+  <!-- Primary SEO Meta Tags -->
+  <meta name="description" content="Breathe new life into your old USB-only Brother laser printer & scanner. Plug in a spare Android phone via USB OTG to unlock native IPP 2.0 wireless printing (brlaser) and 2400 DPI scanning (brscan4) across Windows, macOS, Linux, iOS, and Android." />
+  <meta name="keywords" content="BrotherBridge, Brother printer Wi-Fi, USB OTG print server, Android IPP server, brlaser, brscan4, DCP-L2520D, wireless scanner, open source, GPL-2.0" />
+  <meta name="theme-color" content="#09090b" />
+
+  <!-- Open Graph / Social Sharing Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="BrotherBridge v1.9.0 — Wi-Fi Print & 2400 DPI Scan Server on Any Spare Android Phone" />
+  <meta property="og:description" content="Turn an old USB-only Brother printer & scanner into a driverless IPP 2.0 Wi-Fi printer and 2400 DPI network scanner using a spare Android phone and a $2 USB OTG cable." />
+  <meta property="og:site_name" content="BrotherBridge" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="BrotherBridge v1.9.0 — Repurpose a Drawer Android Phone as a Wireless Print & Scan Server" />
+  <meta name="twitter:description" content="Native IPP 2.0 printing (brlaser) + 2400 DPI scanning (brscan4) for USB-only Brother printers. Zero PC drivers required. Open Source (GPL-2.0)." />
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            obsidian: '#09090b',
+            surface: '#111114',
+            ipp: '#38bdf8',
+            android: '#3ddc84',
+            scanner: '#fb923c',
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Custom Design Tokens, Ambient Lighting & Animations -->
+  <style>
+    :root {
+      --bg-obsidian: #09090b;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.09);
+      --card-border-hover: rgba(255, 255, 255, 0.18);
+    }
+
+    body {
+      background-color: var(--bg-obsidian);
+      color: #f4f4f5;
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Subtle Hero Grid Backdrop */
+    .bg-grid-pattern {
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 50%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 50%, transparent 100%);
+    }
+
+    /* Elevated Glass Card */
+    .glass-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.015) 100%);
+      border: 1px solid var(--card-border);
+      transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .glass-card:hover {
+      border-color: var(--card-border-hover);
+    }
+
+    /* Highlighted Card Glow */
+    .highlight-card {
+      background: linear-gradient(180deg, rgba(61, 220, 132, 0.09) 0%, rgba(56, 189, 248, 0.04) 100%);
+      border: 1px solid rgba(61, 220, 132, 0.35);
+      box-shadow: 0 0 40px -12px rgba(61, 220, 132, 0.2);
+    }
+
+    /* Animated SVG Data Flow Dashes */
+    @keyframes dashFlow {
+      to {
+        stroke-dashoffset: -36;
+      }
+    }
+    .animate-dash-flow {
+      stroke-dasharray: 6 6;
+      animation: dashFlow 1.4s linear infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.4; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    .pulse-soft {
+      animation: pulseDot 2.2s ease-in-out infinite;
+    }
+
+    /* Custom Scrollbar for Code Blocks & Tables */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09090b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3f3f46;
+    }
+
+    /* Hide scrollbar utility for horizontal phone showcase on mobile */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Smooth Accordion Transition */
+    .accordion-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .accordion-item[data-open="true"] .accordion-content {
+      grid-template-rows: 1fr;
+    }
+    .accordion-item[data-open="true"] .accordion-chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Active Architecture Client Card */
+    .client-node[data-active="true"] {
+      border-color: rgba(56, 189, 248, 0.55);
+      background: rgba(56, 189, 248, 0.08);
+      box-shadow: 0 0 24px -8px rgba(56, 189, 248, 0.35);
+    }
+  </style>
+</head>
+
+<body class="selection:bg-sky-500/30 selection:text-sky-100">
+
+  <!-- Global Copy Toast Notification (replaces alert/confirm) -->
+  <div id="toast" role="status" aria-live="polite" class="fixed bottom-6 right-6 z-50 pointer-events-none opacity-0 translate-y-3 transition-all duration-300">
+    <div class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-zinc-900/95 border border-emerald-500/40 shadow-2xl backdrop-blur-md text-sm font-medium text-zinc-100">
+      <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <span id="toast-message">Copied to clipboard</span>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 1. STICKY GLASSMORPHIC NAVBAR                                         -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-40 border-b border-white/[0.08] bg-[#09090b]/80 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Brand Logo + Version Pill -->
+        <a href="#" class="flex items-center gap-2.5 group focus:outline-none">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500/20 via-emerald-500/15 to-orange-500/20 border border-white/15 flex items-center justify-center shadow-inner group-hover:border-sky-400/50 transition-colors">
+            <!-- Inline SVG: Printer-to-WiFi Bridge Icon -->
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6 9V4.5C6 3.95 6.45 3.5 7 3.5H17C17.55 3.5 18 3.95 18 4.5V9" stroke="#38bdf8" stroke-width="1.75" stroke-linecap="round"/>
+              <rect x="3.5" y="9" width="17" height="7.5" rx="2" stroke="#f4f4f5" stroke-width="1.75"/>
+              <path d="M7 14.5H17V20C17 20.55 16.55 21 16 21H8C7.45 21 7 20.55 7 20V14.5Z" fill="#09090b" stroke="#3ddc84" stroke-width="1.75"/>
+              <circle cx="17.2" cy="11.8" r="1" fill="#fb923c"/>
+              <path d="M10 6.5C11.1 5.6 12.9 5.6 14 6.5" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="font-bold text-base sm:text-lg tracking-tight text-white">BrotherBridge</span>
+          <span class="px-2 py-0.5 text-[11px] font-mono font-medium rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/25">v1.9.0</span>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden lg:flex items-center gap-1 text-sm font-medium text-zinc-400" aria-label="Main navigation">
+          <a href="#features" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/[0.04] transition-colors">Features</a>
+          <a href="#architecture" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/[0.04] transition-colors">Architecture</a>
+          <a href="#compatibility" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/[0.04] transition-colors">Compatibility</a>
+          <a href="#setup" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/[0.04] transition-colors">Setup</a>
+          <a href="#api" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/[0.04] transition-colors">Scan API</a>
+          <a href="#faq" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/[0.04] transition-colors">FAQ</a>
+        </nav>
+
+        <!-- Right CTAs -->
+        <div class="hidden sm:flex items-center gap-2.5">
+          <a href="#github-repo" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium text-zinc-200 bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] hover:border-white/20 transition-all">
+            <svg class="w-4 h-4 text-amber-400 fill-amber-400/20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <span>Star on GitHub</span>
+          </a>
+          <a href="#setup" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-zinc-950 bg-white hover:bg-zinc-200 transition-all shadow-lg shadow-white/5">
+            <span>Get Started</span>
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" type="button" aria-label="Toggle Menu" aria-expanded="false" class="lg:hidden p-2.5 rounded-xl text-zinc-300 hover:text-white hover:bg-white/[0.06] border border-transparent hover:border-white/10 transition-colors">
+          <svg id="menu-icon-open" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <svg id="menu-icon-close" class="w-5 h-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-white/[0.08] bg-[#0b0b0e]/95 backdrop-blur-xl px-4 py-4 space-y-1">
+      <a href="#features" class="mobile-nav-link block px-3.5 py-2.5 rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/[0.06]">Features</a>
+      <a href="#architecture" class="mobile-nav-link block px-3.5 py-2.5 rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/[0.06]">Architecture</a>
+      <a href="#compatibility" class="mobile-nav-link block px-3.5 py-2.5 rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/[0.06]">Compatibility</a>
+      <a href="#setup" class="mobile-nav-link block px-3.5 py-2.5 rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/[0.06]">Setup</a>
+      <a href="#api" class="mobile-nav-link block px-3.5 py-2.5 rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/[0.06]">Scan API</a>
+      <a href="#faq" class="mobile-nav-link block px-3.5 py-2.5 rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/[0.06]">FAQ</a>
+      <div class="pt-3 mt-2 border-t border-white/[0.08] flex flex-col gap-2">
+        <a href="#github-repo" class="mobile-nav-link flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-100 bg-white/[0.05] border border-white/10">
+          <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          Star on GitHub
+        </a>
+        <a href="#setup" class="mobile-nav-link flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-950 bg-white">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================================================================== -->
+    <!-- 2. VIRAL HERO SECTION                                                 -->
+    <!-- ===================================================================== -->
+    <section class="relative pt-14 pb-20 sm:pt-20 sm:pb-24 overflow-hidden">
+      <!-- Ambient Radial Glows + Subtle Grid -->
+      <div class="absolute inset-0 bg-grid-pattern pointer-events-none"></div>
+      <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[760px] h-[380px] bg-gradient-to-r from-sky-500/15 via-emerald-500/12 to-orange-500/15 blur-[110px] rounded-full pointer-events-none"></div>
+
+      <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <!-- Status Pill -->
+        <div class="inline-flex flex-wrap items-center justify-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono text-zinc-300 mb-7 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-soft"></span>
+          <span>Open Source</span>
+          <span class="text-zinc-600">·</span>
+          <span>GPL-2.0</span>
+          <span class="text-zinc-600">·</span>
+          <span class="text-emerald-300">Android 7.0+</span>
+          <span class="text-zinc-600">·</span>
+          <span class="text-sky-300">No PC Drivers Needed</span>
+        </div>
+
+        <!-- Bold Punchy Headline -->
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.08] max-w-4xl mx-auto">
+          Turn a drawer Android phone into a
+          <span class="bg-gradient-to-r from-sky-400 via-emerald-400 to-orange-400 bg-clip-text text-transparent">Wi-Fi Print &amp; Scan Server.</span>
+        </h1>
+
+        <!-- Subheadline -->
+        <p class="mt-6 text-base sm:text-lg text-zinc-400 max-w-3xl mx-auto leading-relaxed">
+          Breathe new life into your old USB-only Brother laser printer &amp; scanner. Plug in a <span class="text-zinc-200 font-medium">$2 USB OTG cable</span> to unlock native IPP 2.0 printing (<code class="font-mono text-sky-300 text-[0.9em] bg-sky-500/10 px-1.5 py-0.5 rounded">brlaser</code>) and 2400 DPI wireless scanning (<code class="font-mono text-orange-300 text-[0.9em] bg-orange-500/10 px-1.5 py-0.5 rounded">brscan4</code>) across Windows, macOS, Linux, iOS, and Android.
+        </p>
+
+        <!-- Primary CTAs -->
+        <div class="mt-9 flex flex-wrap items-center justify-center gap-3.5">
+          <a href="#setup" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-zinc-950 font-semibold text-sm sm:text-base hover:bg-zinc-200 transition-all shadow-xl shadow-white/10">
+            <span>Quick Start Guide</span>
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+          <a href="#compatibility" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/[0.05] text-white font-semibold text-sm sm:text-base border border-white/12 hover:bg-white/[0.09] hover:border-white/25 transition-all">
+            <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>Check Your Model</span>
+          </a>
+          <a href="#github-repo" class="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-transparent text-zinc-300 font-medium text-sm sm:text-base border border-white/10 hover:text-white hover:bg-white/[0.04] transition-all">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            <span>View on GitHub</span>
+          </a>
+        </div>
+
+        <!-- Viral Value Comparison Strip (3 Cards) -->
+        <div class="mt-14 grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-5xl mx-auto">
+          <!-- Card 1: New Printer -->
+          <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between text-xs font-mono text-zinc-500 uppercase tracking-wider mb-2">
+                <span>Option 1</span>
+                <span class="text-rose-400/90">Adds to e-waste</span>
+              </div>
+              <h3 class="text-sm font-semibold text-zinc-300">Buying a New Wi-Fi Laser Printer</h3>
+            </div>
+            <div class="mt-4 pt-4 border-t border-white/[0.06] flex items-baseline justify-between">
+              <span class="text-2xl font-bold font-mono text-zinc-400 line-through decoration-rose-500/60">$150+</span>
+              <span class="text-xs text-zinc-500">Replacing working hardware</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Raspberry Pi -->
+          <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between text-xs font-mono text-zinc-500 uppercase tracking-wider mb-2">
+                <span>Option 2</span>
+                <span class="text-amber-400/90">CLI Maintenance</span>
+              </div>
+              <h3 class="text-sm font-semibold text-zinc-300">Raspberry Pi + SD + Power Supply</h3>
+            </div>
+            <div class="mt-4 pt-4 border-t border-white/[0.06] flex items-baseline justify-between">
+              <span class="text-2xl font-bold font-mono text-zinc-400">$65+</span>
+              <span class="text-xs text-zinc-500">Linux CUPS / SANE upkeep</span>
+            </div>
+          </div>
+
+          <!-- Card 3: BrotherBridge (Highlighted) -->
+          <div class="highlight-card rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 px-2.5 py-1 bg-emerald-400 text-zinc-950 text-[10px] font-bold uppercase tracking-wider rounded-bl-xl">
+              Best Value
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5 text-xs font-mono text-emerald-300 uppercase tracking-wider mb-2">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>BrotherBridge + Spare Phone</span>
+              </div>
+              <h3 class="text-sm font-semibold text-white">2-minute setup, Print + 2400 DPI Scan</h3>
+            </div>
+            <div class="mt-4 pt-4 border-t border-emerald-400/20 flex items-baseline justify-between">
+              <span class="text-2xl font-extrabold font-mono text-emerald-300">$0–$3 <span class="text-xs font-normal text-emerald-200/80">OTG Cable</span></span>
+              <span class="text-xs font-medium text-sky-300">Zero drivers</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Metric Badges Bar -->
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-2.5 max-w-4xl mx-auto">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-xs font-mono text-sky-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>IPP 1.1 / 2.0 + PWG Raster
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-xs font-mono text-orange-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>Up to 2400 DPI Scan
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>mDNS / UDP / Static IP
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-xs font-mono text-zinc-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>18 Languages
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-xs font-mono text-zinc-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>Port 8631
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 3. ANIMATED INTERACTIVE ARCHITECTURE DIAGRAM                          -->
+    <!-- ===================================================================== -->
+    <section id="architecture" class="py-20 border-t border-white/[0.06] relative">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="max-w-2xl mb-12">
+          <p class="text-xs font-mono uppercase tracking-widest text-sky-400 mb-2">System Architecture</p>
+          <h2 class="text-2xl sm:text-4xl font-bold tracking-tight text-white">One USB OTG bridge. Every device on your network.</h2>
+          <p class="mt-3 text-zinc-400 text-sm sm:text-base">
+            Native Kotlin ports of <code class="font-mono text-sky-300">brlaser</code> and <code class="font-mono text-orange-300">brscan4</code> run directly on the host Android phone, speaking standard IPP 2.0 and HTTP JSON over your local Wi-Fi or Hotspot. Click any client below to inspect the protocol path.
+          </p>
+        </div>
+
+        <!-- 3-Column Flow Diagram -->
+        <div class="grid grid-cols-1 lg:grid-cols-11 gap-4 lg:gap-0 items-center">
+
+          <!-- NODE 1: USB-Only Hardware -->
+          <div class="lg:col-span-3 glass-card rounded-2xl p-6 relative border-orange-500/25">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[11px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-md bg-orange-500/15 text-orange-300 border border-orange-500/25">USB-Only Hardware</span>
+              <span class="text-xs font-mono text-zinc-500">Node 01</span>
+            </div>
+            <div class="flex items-center gap-3.5 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/25 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white">Brother Printer &amp; Scanner</h3>
+                <p class="text-xs font-mono text-zinc-400">e.g., DCP-L2520D</p>
+              </div>
+            </div>
+            <ul class="space-y-2 text-xs text-zinc-400 border-t border-white/[0.07] pt-4">
+              <li class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                <span>PJL + 1030m monochrome laser raster</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                <span>Brother 4th-gen USB flatbed / ADF scan</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-zinc-200 font-medium">USB OTG Cable (Required)</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- CONNECTOR 1 (USB OTG) -->
+          <div class="lg:col-span-1 flex lg:flex-col items-center justify-center py-2 lg:py-0">
+            <!-- Desktop Horizontal Animated SVG Connector -->
+            <div class="hidden lg:flex flex-col items-center w-full">
+              <span class="text-[10px] font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-full mb-2 whitespace-nowrap">USB OTG</span>
+              <svg class="w-full h-8 overflow-visible" viewBox="0 0 80 24" fill="none">
+                <line x1="0" y1="12" x2="80" y2="12" stroke="rgba(61,220,132,0.22)" stroke-width="2"/>
+                <line x1="0" y1="12" x2="80" y2="12" stroke="#3ddc84" stroke-width="2" class="animate-dash-flow"/>
+                <circle r="3.5" fill="#3ddc84">
+                  <animateMotion dur="1.8s" repeatCount="indefinite" path="M 0,12 L 80,12" />
+                </circle>
+              </svg>
+            </div>
+            <!-- Mobile Vertical Connector -->
+            <div class="flex lg:hidden flex-col items-center gap-1">
+              <div class="w-0.5 h-5 bg-gradient-to-b from-orange-400 to-emerald-400"></div>
+              <span class="text-[10px] font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-0.5 rounded-full">USB OTG Cable (Required)</span>
+              <div class="w-0.5 h-5 bg-gradient-to-b from-emerald-400 to-emerald-500/40"></div>
+            </div>
+          </div>
+
+          <!-- NODE 2: Spare Android Device (Host Mode) -->
+          <div class="lg:col-span-3 rounded-2xl p-6 relative bg-gradient-to-b from-emerald-500/[0.08] via-[#111114] to-sky-500/[0.06] border border-emerald-400/35 shadow-2xl shadow-emerald-500/10">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[11px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Spare Android (Host)</span>
+              <span class="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-300">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-soft"></span>LIVE :8631
+              </span>
+            </div>
+            <div class="flex items-center gap-3.5 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              </div>
+              <div>
+                <h3 class="font-bold text-white">BrotherBridge Server</h3>
+                <p class="text-xs font-mono text-emerald-300/90">Android 7.0+ Foreground Host</p>
+              </div>
+            </div>
+            <div class="space-y-2 text-xs font-mono border-t border-white/10 pt-4">
+              <div class="flex items-center gap-2 text-sky-200 bg-sky-500/10 px-2.5 py-1.5 rounded-lg border border-sky-500/20">
+                <span class="text-sky-400">▸</span> IPP 1.1/2.0 + PWG Raster (brlaser)
+              </div>
+              <div class="flex items-center gap-2 text-orange-200 bg-orange-500/10 px-2.5 py-1.5 rounded-lg border border-orange-500/20">
+                <span class="text-orange-400">▸</span> Background Scan Vault (brscan4)
+              </div>
+              <div class="flex items-center gap-2 text-zinc-200 bg-white/[0.04] px-2.5 py-1.5 rounded-lg border border-white/10">
+                <span class="text-emerald-400">▸</span> mDNS (_ipp._tcp) &amp; UDP Discovery
+              </div>
+              <div class="flex items-center gap-2 text-zinc-200 bg-white/[0.04] px-2.5 py-1.5 rounded-lg border border-white/10">
+                <span class="text-purple-400">▸</span> HTTP Scan &amp; Health API (:8631)
+              </div>
+              <div class="flex items-center gap-2 text-zinc-300 bg-white/[0.03] px-2.5 py-1.5 rounded-lg border border-white/[0.07]">
+                <span class="text-amber-400">▸</span> Live Queue, Progress &amp; Telemetry
+              </div>
+            </div>
+          </div>
+
+          <!-- CONNECTOR 2 (Wi-Fi / Hotspot) -->
+          <div class="lg:col-span-1 flex lg:flex-col items-center justify-center py-2 lg:py-0">
+            <!-- Desktop Horizontal Animated SVG Connector -->
+            <div class="hidden lg:flex flex-col items-center w-full">
+              <span class="text-[10px] font-mono text-sky-300 bg-sky-500/10 border border-sky-500/25 px-2 py-0.5 rounded-full mb-2 whitespace-nowrap">Wi-Fi / LAN</span>
+              <svg class="w-full h-8 overflow-visible" viewBox="0 0 80 24" fill="none">
+                <line x1="0" y1="12" x2="80" y2="12" stroke="rgba(56,189,248,0.22)" stroke-width="2"/>
+                <line x1="0" y1="12" x2="80" y2="12" stroke="#38bdf8" stroke-width="2" class="animate-dash-flow"/>
+                <circle r="3.5" fill="#38bdf8">
+                  <animateMotion dur="1.5s" repeatCount="indefinite" path="M 0,12 L 80,12" />
+                </circle>
+              </svg>
+            </div>
+            <!-- Mobile Vertical Connector -->
+            <div class="flex lg:hidden flex-col items-center gap-1">
+              <div class="w-0.5 h-5 bg-gradient-to-b from-emerald-400 to-sky-400"></div>
+              <span class="text-[10px] font-mono text-sky-300 bg-sky-500/10 border border-sky-500/25 px-2.5 py-0.5 rounded-full">Local Wi-Fi / Hotspot (Port 8631)</span>
+              <div class="w-0.5 h-5 bg-gradient-to-b from-sky-400 to-sky-500/40"></div>
+            </div>
+          </div>
+
+          <!-- NODE 3: Local Wi-Fi / Hotspot Clients (3 Interactive Clickable Cards) -->
+          <div class="lg:col-span-3 space-y-3">
+            <div class="flex items-center justify-between px-1 mb-1">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-sky-300">Local Wi-Fi / Hotspot Clients</span>
+              <span class="text-[11px] text-zinc-500">Click to inspect</span>
+            </div>
+
+            <!-- Client 1: Desktop & iOS -->
+            <button type="button" data-client="ipp" data-active="true" class="client-node w-full text-left glass-card rounded-xl p-4 cursor-pointer focus:outline-none">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h4 class="text-sm font-semibold text-white">Windows 10/11, macOS, Linux, iOS</h4>
+                  <p class="text-xs font-mono text-sky-300 mt-0.5">IPP 1.1/2.0 + PWG Raster · Driverless</p>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/25 shrink-0">PRINT</span>
+              </div>
+            </button>
+
+            <!-- Client 2: Android Client -->
+            <button type="button" data-client="android" data-active="false" class="client-node w-full text-left glass-card rounded-xl p-4 cursor-pointer focus:outline-none">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h4 class="text-sm font-semibold text-white">Android Client</h4>
+                  <p class="text-xs font-mono text-emerald-300 mt-0.5">BrotherBridge + Persistent Print Plugin</p>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 shrink-0">PRINT+SCAN</span>
+              </div>
+            </button>
+
+            <!-- Client 3: PC Client & Scripts -->
+            <button type="button" data-client="api" data-active="false" class="client-node w-full text-left glass-card rounded-xl p-4 cursor-pointer focus:outline-none">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h4 class="text-sm font-semibold text-white">PC Client &amp; Scripts</h4>
+                  <p class="text-xs font-mono text-orange-300 mt-0.5">HTTP JSON Scan API · Port 8631 + SHA-256</p>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-orange-500/15 text-orange-300 border border-orange-500/25 shrink-0">SCAN API</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Protocol Detail Inspector Bar -->
+        <div id="arch-inspector" class="mt-6 glass-card rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-sky-500/25 bg-sky-500/[0.03]">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center shrink-0 mt-0.5">
+              <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span id="arch-title" class="text-sm font-semibold text-white">Windows 10/11, macOS, Linux, iOS — Native IPP 2.0</span>
+                <span id="arch-badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-300">PORT 8631 · /ipp/print</span>
+              </div>
+              <p id="arch-desc" class="text-xs sm:text-sm text-zinc-400 mt-1">
+                Auto-discovered via Bonjour/mDNS (_ipp._tcp) or manual URL. Supports application/pdf, image/pwg-raster (Windows Microsoft IPP Class Driver), HTTP chunked decoding, and Expect: 100-continue with zero proprietary drivers.
+              </p>
+            </div>
+          </div>
+          <a id="arch-cta" href="#setup" class="text-xs font-mono font-medium text-sky-300 hover:text-sky-200 whitespace-nowrap inline-flex items-center gap-1 shrink-0">
+            Jump to Setup →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 4. BENTO FEATURE GRID                                                 -->
+    <!-- ===================================================================== -->
+    <section id="features" class="py-20 border-t border-white/[0.06]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mb-12">
+          <p class="text-xs font-mono uppercase tracking-widest text-emerald-400 mb-2">Engineered for Reliability</p>
+          <h2 class="text-2xl sm:text-4xl font-bold tracking-tight text-white">Everything a modern Wi-Fi MFP does—and more.</h2>
+          <p class="mt-3 text-zinc-400 text-sm sm:text-base">
+            Not a fragile wrapper. BrotherBridge embeds full raster compression, perspective cropping, health telemetry, and fail-safe scan recovery in one self-contained Android app.
+          </p>
+        </div>
+
+        <!-- 6-Card Bento Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+          <!-- Bento 1: Driverless IPP 2.0 Printing -->
+          <article class="glass-card rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                </div>
+                <span class="text-xs font-mono text-sky-300 bg-sky-500/10 border border-sky-500/20 px-2.5 py-1 rounded-full">brlaser + RFC 8011</span>
+              </div>
+              <h3 class="text-lg font-bold text-white">Driverless IPP 2.0 Printing</h3>
+              <p class="mt-2 text-sm text-zinc-400 leading-relaxed">
+                Exposes a native <code class="font-mono text-sky-300">IPP 1.1 / 2.0</code> server on port <code class="font-mono text-zinc-200">8631</code> (<code class="font-mono text-zinc-300">/ipp/print</code>) supporting <code class="font-mono text-zinc-200">application/pdf</code>, <code class="font-mono text-sky-300">image/pwg-raster</code> (native Windows Microsoft IPP Class Driver), JPEG, PNG, and WebP. Full live sheet preview in-app.
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-white/[0.07] flex flex-wrap gap-2">
+              <span class="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-zinc-300">A4 / Letter / Legal / A5 / B5</span>
+              <span class="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-zinc-300">300 / 600 / 1200 DPI</span>
+              <span class="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-zinc-300">Duplex &amp; Toner Save (Eco)</span>
+              <span class="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-zinc-300">N-Up (1–16 pages/sheet)</span>
+              <span class="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-zinc-300">Fit vs Full Page Crop</span>
+              <span class="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-zinc-300">Grayscale &amp; 2-Bit B&amp;W</span>
+            </div>
+          </article>
+
+          <!-- Bento 2: 2400 DPI Wireless Scanning -->
+          <article class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="4" y1="12" x2="20" y2="12"></line></svg>
+                </div>
+                <span class="text-xs font-mono text-orange-300 bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-full">brscan4</span>
+              </div>
+              <h3 class="text-lg font-bold text-white">2400 DPI Wireless Scanning</h3>
+              <p class="mt-2 text-sm text-zinc-400 leading-relaxed">
+                Scan at <span class="text-zinc-200 font-medium">150, 300, 600, 1200, or 2400 DPI</span> in Color, Grayscale, or B&amp;W with Brightness/Contrast controls across Flatbed &amp; ADF.
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-white/[0.07] space-y-1.5 text-xs text-zinc-400">
+              <div class="flex items-center gap-2"><span class="text-orange-400">✓</span> Fail-safe foreground background service</div>
+              <div class="flex items-center gap-2"><span class="text-orange-400">✓</span> SHA-256 integrity checksum verification</div>
+              <div class="flex items-center gap-2"><span class="text-orange-400">✓</span> Auto-recovery of uncollected scans</div>
+            </div>
+          </article>
+
+          <!-- Bento 3: 4-Corner Perspective Editor & PDF Studio -->
+          <article class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"></path><path d="M18 22V8a2 2 0 0 0-2-2H2"></path></svg>
+                </div>
+                <span class="text-xs font-mono text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">Built-In Studio</span>
+              </div>
+              <h3 class="text-lg font-bold text-white">4-Corner Editor &amp; PDF Studio</h3>
+              <p class="mt-2 text-sm text-zinc-400 leading-relaxed">
+                Perspective crop with one-tap <span class="text-zinc-200">Auto Adjust</span> &amp; Undo/Redo, 2-in-1 ID Card / Page Merge, 90° rotation, Grid/Tiles/List views, and an Offline Scan Library.
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-white/[0.07] flex flex-wrap gap-2">
+              <span class="px-2 py-0.5 rounded bg-white/[0.04] text-xs font-mono text-zinc-300">JPG</span>
+              <span class="px-2 py-0.5 rounded bg-white/[0.04] text-xs font-mono text-zinc-300">PNG</span>
+              <span class="px-2 py-0.5 rounded bg-white/[0.04] text-xs font-mono text-zinc-300">Multi-Page PDF</span>
+              <span class="px-2 py-0.5 rounded bg-white/[0.04] text-xs font-mono text-zinc-300">2-in-1 Merge</span>
+            </div>
+          </article>
+
+          <!-- Bento 4: Persistent Android Print Service Plugin -->
+          <article class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><path d="M9 10h6"></path><path d="M9 14h6"></path></svg>
+                </div>
+                <span class="text-xs font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">PrintService</span>
+              </div>
+              <h3 class="text-lg font-bold text-white">Persistent Android Print Plugin</h3>
+              <p class="mt-2 text-sm text-zinc-400 leading-relaxed">
+                Print straight from <span class="text-zinc-200">Chrome, Google Drive, Gmail, Photos, and Files</span>. Stays active even after closing BrotherBridge until the host goes offline or you tap <em>Disconnect Device</em>.
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-white/[0.07] text-xs font-mono text-emerald-300/90">
+              Settings → Printing → BrotherBridge ✓
+            </div>
+          </article>
+
+          <!-- Bento 5: Live Health Telemetry & Safe Queue -->
+          <article class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                </div>
+                <span class="text-xs font-mono text-sky-300 bg-sky-500/10 border border-sky-500/20 px-2.5 py-1 rounded-full">/api/status</span>
+              </div>
+              <h3 class="text-lg font-bold text-white">Live Health Telemetry &amp; Queue</h3>
+              <p class="mt-2 text-sm text-zinc-400 leading-relaxed">
+                Monitor <span class="text-zinc-200">toner level, drum life, and paper tray status</span> locally or remotely. Track connected Wi-Fi clients, cancel queued jobs, inspect protocol logs, and prevent accidental mid-job disconnects.
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-white/[0.07] grid grid-cols-3 gap-2 text-center font-mono text-[11px]">
+              <div class="p-1.5 rounded bg-white/[0.03] border border-white/[0.06]"><div class="text-zinc-500">Toner</div><div class="text-emerald-400 font-semibold">Live</div></div>
+              <div class="p-1.5 rounded bg-white/[0.03] border border-white/[0.06]"><div class="text-zinc-500">Drum</div><div class="text-sky-400 font-semibold">Tracked</div></div>
+              <div class="p-1.5 rounded bg-white/[0.03] border border-white/[0.06]"><div class="text-zinc-500">Queue</div><div class="text-orange-400 font-semibold">Cancelable</div></div>
+            </div>
+          </article>
+
+          <!-- Bento 6: 18 Built-In Languages (Full-Width Bar on lg) -->
+          <article class="glass-card rounded-2xl p-6 md:col-span-2 lg:col-span-3 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="max-w-xl">
+              <div class="inline-flex items-center gap-2 text-xs font-mono text-purple-300 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-full mb-3">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                18 Built-In Languages
+              </div>
+              <h3 class="text-lg font-bold text-white">Instant In-App Localization</h3>
+              <p class="mt-1.5 text-sm text-zinc-400">Switch UI languages on the fly without changing system locale.</p>
+            </div>
+            <div class="flex flex-wrap gap-1.5 lg:max-w-2xl">
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">English (US/CA/IN/AU/GB)</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">हिन्दी Hindi</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">日本語 Japanese</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">Deutsch</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">Français</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">简体中文</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">Español</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">Bahasa Indonesia</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">Tiếng Việt</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">ไทย Thai</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">Svenska</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">Dansk</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">Norsk</span>
+              <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-xs text-zinc-300">Suomi</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 5. APP PREVIEW SHOWCASE (4 MOBILE MOCKUPS WITH SMART FALLBACK UI)     -->
+    <!-- ===================================================================== -->
+    <section id="screenshots" class="py-20 border-t border-white/[0.06] bg-white/[0.01]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+          <div class="max-w-2xl">
+            <p class="text-xs font-mono uppercase tracking-widest text-orange-400 mb-2">App Interface</p>
+            <h2 class="text-2xl sm:text-4xl font-bold tracking-tight text-white">Designed for speed on both Host &amp; Client.</h2>
+            <p class="mt-2.5 text-zinc-400 text-sm sm:text-base">
+              Clean native Android UI for managing USB OTG server state, sheet imposition, 2400 DPI scanning, and system-wide printing.
+            </p>
+          </div>
+          <span class="text-xs font-mono text-zinc-500 sm:hidden">← Swipe to browse screens →</span>
+        </div>
+
+        <!-- 4 Side-by-Side Phone Mockups (Scrollable Snap Row on Mobile, 4-Col Grid on Desktop) -->
+        <div class="flex lg:grid lg:grid-cols-4 gap-6 overflow-x-auto snap-x snap-mandatory pb-4 lg:pb-0 no-scrollbar">
+
+          <!-- PHONE 1: Host Dashboard -->
+          <div class="snap-center shrink-0 w-[275px] sm:w-[290px] lg:w-auto flex flex-col">
+            <div class="rounded-[2.2rem] p-2.5 bg-zinc-900 border border-white/15 shadow-2xl">
+              <div class="relative aspect-[9/18.5] rounded-[1.7rem] overflow-hidden bg-[#0e1015] border border-white/[0.08]">
+                <!-- Notch -->
+                <div class="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-4 bg-black rounded-full z-20"></div>
+                <!-- Fallback Native HTML/CSS UI -->
+                <div class="w-full h-full pt-8 px-3.5 pb-4 flex flex-col justify-between text-left select-none">
+                  <div>
+                    <div class="flex items-center justify-between mb-3">
+                      <span class="text-[11px] font-bold text-white">BrotherBridge</span>
+                      <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-mono">HOST ON</span>
+                    </div>
+                    <!-- USB Card -->
+                    <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 mb-2.5">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        <span class="text-[11px] font-semibold text-white">Brother DCP-L2520D</span>
+                      </div>
+                      <p class="text-[10px] font-mono text-emerald-300/90 mt-1">USB OTG Active · Ready</p>
+                      <div class="mt-2.5 grid grid-cols-2 gap-1.5">
+                        <div class="bg-black/40 rounded-lg p-1.5">
+                          <div class="text-[9px] text-zinc-400">Toner</div>
+                          <div class="w-full h-1 bg-zinc-700 rounded-full mt-1"><div class="w-4/5 h-1 bg-emerald-400 rounded-full"></div></div>
+                        </div>
+                        <div class="bg-black/40 rounded-lg p-1.5">
+                          <div class="text-[9px] text-zinc-400">Drum</div>
+                          <div class="w-full h-1 bg-zinc-700 rounded-full mt-1"><div class="w-11/12 h-1 bg-sky-400 rounded-full"></div></div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Server Endpoint Card -->
+                    <div class="p-3 rounded-xl bg-white/[0.04] border border-white/10 mb-2.5">
+                      <div class="text-[9px] font-mono text-zinc-400 uppercase">IPP 2.0 &amp; HTTP API</div>
+                      <div class="text-[11px] font-mono text-sky-300 mt-1">192.168.1.50:8631</div>
+                      <div class="flex items-center gap-1.5 mt-2">
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 font-mono">mDNS ✓</span>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-300 font-mono">UDP ✓</span>
+                      </div>
+                    </div>
+                    <!-- Connected Clients -->
+                    <div class="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.07]">
+                      <div class="flex justify-between text-[10px] text-zinc-400 mb-1.5">
+                        <span>Connected Clients</span><span class="text-white font-mono">3</span>
+                      </div>
+                      <div class="space-y-1 text-[9px] font-mono text-zinc-300">
+                        <div class="flex justify-between"><span>Win11-Laptop</span><span class="text-sky-400">IPP</span></div>
+                        <div class="flex justify-between"><span>Pixel-8-Pro</span><span class="text-emerald-400">Plugin</span></div>
+                        <div class="flex justify-between"><span>Linux-Desk</span><span class="text-orange-400">API</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-white/[0.08] text-center text-[9px] text-zinc-400">
+                    <div class="py-1 rounded-lg bg-white/10 text-white font-medium">Server</div>
+                    <div class="py-1 rounded-lg">Print</div>
+                    <div class="py-1 rounded-lg">Scan</div>
+                  </div>
+                </div>
+                <!-- Real Screenshot Overlay (loads automatically when deployed in repo) -->
+                <img
+                  data-primary="docs/screenshots/host_dashboard.jpg"
+                  data-fallback="screenshots/host_dashboard.jpg"
+                  src="docs/screenshots/host_dashboard.jpg"
+                  alt="BrotherBridge Host Dashboard screenshot"
+                  class="smart-screenshot absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 z-10"
+                />
+              </div>
+            </div>
+            <div class="mt-4 px-1">
+              <h3 class="text-sm font-semibold text-white">1. Host Dashboard</h3>
+              <p class="text-xs text-zinc-400 mt-0.5">USB OTG status, connected clients, IP &amp; mDNS.</p>
+            </div>
+          </div>
+
+          <!-- PHONE 2: Print Preview & Controls -->
+          <div class="snap-center shrink-0 w-[275px] sm:w-[290px] lg:w-auto flex flex-col">
+            <div class="rounded-[2.2rem] p-2.5 bg-zinc-900 border border-white/15 shadow-2xl">
+              <div class="relative aspect-[9/18.5] rounded-[1.7rem] overflow-hidden bg-[#0e1015] border border-white/[0.08]">
+                <div class="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-4 bg-black rounded-full z-20"></div>
+                <div class="w-full h-full pt-8 px-3.5 pb-4 flex flex-col justify-between text-left select-none">
+                  <div>
+                    <div class="flex items-center justify-between mb-2.5">
+                      <span class="text-[11px] font-bold text-white">Print Preview</span>
+                      <span class="text-[9px] font-mono text-sky-300">2-Up · A4</span>
+                    </div>
+                    <!-- Live Sheet Preview -->
+                    <div class="p-3 rounded-xl bg-zinc-800/80 border border-white/10 flex items-center justify-center mb-3">
+                      <div class="w-28 h-36 bg-white rounded-sm shadow-lg p-2 flex flex-col gap-1.5">
+                        <div class="flex-1 border border-zinc-300 rounded-[2px] p-1 space-y-1">
+                          <div class="h-1.5 w-3/4 bg-zinc-800 rounded"></div>
+                          <div class="h-1 w-full bg-zinc-300 rounded"></div>
+                          <div class="h-1 w-5/6 bg-zinc-300 rounded"></div>
+                        </div>
+                        <div class="flex-1 border border-zinc-300 rounded-[2px] p-1 space-y-1">
+                          <div class="h-1.5 w-2/3 bg-zinc-800 rounded"></div>
+                          <div class="h-1 w-full bg-zinc-300 rounded"></div>
+                          <div class="h-1 w-4/5 bg-zinc-300 rounded"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Controls -->
+                    <div class="space-y-1.5 text-[10px]">
+                      <div class="flex justify-between items-center p-2 rounded-lg bg-white/[0.04] border border-white/[0.07]">
+                        <span class="text-zinc-400">Resolution</span><span class="font-mono text-white">600 DPI</span>
+                      </div>
+                      <div class="flex justify-between items-center p-2 rounded-lg bg-white/[0.04] border border-white/[0.07]">
+                        <span class="text-zinc-400">Duplex</span><span class="font-mono text-sky-300">Long-Edge</span>
+                      </div>
+                      <div class="flex justify-between items-center p-2 rounded-lg bg-white/[0.04] border border-white/[0.07]">
+                        <span class="text-zinc-400">N-Up / Margins</span><span class="font-mono text-zinc-200">2 / 10mm</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="w-full py-2 rounded-xl bg-sky-500 text-zinc-950 text-center text-[11px] font-bold">
+                    Print via brlaser (2 Pages)
+                  </div>
+                </div>
+                <img
+                  data-primary="docs/screenshots/print_preview.jpg"
+                  data-fallback="screenshots/print_preview.jpg"
+                  src="docs/screenshots/print_preview.jpg"
+                  alt="BrotherBridge Print Preview screenshot"
+                  class="smart-screenshot absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 z-10"
+                />
+              </div>
+            </div>
+            <div class="mt-4 px-1">
+              <h3 class="text-sm font-semibold text-white">2. Print Preview &amp; Controls</h3>
+              <p class="text-xs text-zinc-400 mt-0.5">Live sheet preview, N-Up, margins &amp; duplex.</p>
+            </div>
+          </div>
+
+          <!-- PHONE 3: Scan Controls & Crop -->
+          <div class="snap-center shrink-0 w-[275px] sm:w-[290px] lg:w-auto flex flex-col">
+            <div class="rounded-[2.2rem] p-2.5 bg-zinc-900 border border-white/15 shadow-2xl">
+              <div class="relative aspect-[9/18.5] rounded-[1.7rem] overflow-hidden bg-[#0e1015] border border-white/[0.08]">
+                <div class="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-4 bg-black rounded-full z-20"></div>
+                <div class="w-full h-full pt-8 px-3.5 pb-4 flex flex-col justify-between text-left select-none">
+                  <div>
+                    <div class="flex items-center justify-between mb-2.5">
+                      <span class="text-[11px] font-bold text-white">4-Corner Crop</span>
+                      <span class="text-[9px] font-mono text-orange-300">2400 DPI</span>
+                    </div>
+                    <!-- Perspective Crop Canvas -->
+                    <div class="relative h-44 rounded-xl bg-zinc-950 border border-white/10 p-4 flex items-center justify-center mb-3">
+                      <div class="relative w-28 h-32 bg-zinc-200/95 rounded-xs transform -rotate-2 p-2 shadow-xl">
+                        <div class="h-1.5 w-12 bg-zinc-700 rounded mb-1.5"></div>
+                        <div class="space-y-1">
+                          <div class="h-1 w-full bg-zinc-400 rounded"></div>
+                          <div class="h-1 w-5/6 bg-zinc-400 rounded"></div>
+                          <div class="h-1 w-4/5 bg-zinc-400 rounded"></div>
+                        </div>
+                        <!-- 4 Corner Crop Handles -->
+                        <span class="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full bg-orange-400 border-2 border-white shadow"></span>
+                        <span class="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-orange-400 border-2 border-white shadow"></span>
+                        <span class="absolute -bottom-1.5 -left-1.5 w-3 h-3 rounded-full bg-orange-400 border-2 border-white shadow"></span>
+                        <span class="absolute -bottom-1.5 -right-1.5 w-3 h-3 rounded-full bg-orange-400 border-2 border-white shadow"></span>
+                      </div>
+                    </div>
+                    <!-- DPI Selector Pills -->
+                    <div class="flex justify-between gap-1 mb-2.5 font-mono text-[9px]">
+                      <span class="flex-1 text-center py-1 rounded bg-white/[0.04] text-zinc-400">300</span>
+                      <span class="flex-1 text-center py-1 rounded bg-white/[0.04] text-zinc-400">600</span>
+                      <span class="flex-1 text-center py-1 rounded bg-orange-500/20 text-orange-300 border border-orange-500/40">1200</span>
+                      <span class="flex-1 text-center py-1 rounded bg-white/[0.04] text-zinc-400">2400</span>
+                    </div>
+                    <div class="flex gap-1.5 text-[10px]">
+                      <div class="flex-1 py-1.5 rounded-lg bg-white/[0.06] text-center text-zinc-200">Auto Adjust</div>
+                      <div class="flex-1 py-1.5 rounded-lg bg-white/[0.06] text-center text-zinc-200">Rotate 90°</div>
+                    </div>
+                  </div>
+                  <div class="w-full py-2 rounded-xl bg-orange-400 text-zinc-950 text-center text-[11px] font-bold">
+                    Apply &amp; Verify SHA-256
+                  </div>
+                </div>
+                <img
+                  data-primary="docs/screenshots/scan_controls.jpg"
+                  data-fallback="screenshots/scan_controls.jpg"
+                  src="docs/screenshots/scan_controls.jpg"
+                  alt="BrotherBridge Scan Controls and Crop screenshot"
+                  class="smart-screenshot absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 z-10"
+                />
+              </div>
+            </div>
+            <div class="mt-4 px-1">
+              <h3 class="text-sm font-semibold text-white">3. Scan Controls &amp; Crop</h3>
+              <p class="text-xs text-zinc-400 mt-0.5">Up to 2400 DPI, 4-corner crop &amp; auto-adjust.</p>
+            </div>
+          </div>
+
+          <!-- PHONE 4: Print Service & Library -->
+          <div class="snap-center shrink-0 w-[275px] sm:w-[290px] lg:w-auto flex flex-col">
+            <div class="rounded-[2.2rem] p-2.5 bg-zinc-900 border border-white/15 shadow-2xl">
+              <div class="relative aspect-[9/18.5] rounded-[1.7rem] overflow-hidden bg-[#0e1015] border border-white/[0.08]">
+                <div class="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-4 bg-black rounded-full z-20"></div>
+                <div class="w-full h-full pt-8 px-3.5 pb-4 flex flex-col justify-between text-left select-none">
+                  <div>
+                    <div class="flex items-center justify-between mb-2.5">
+                      <span class="text-[11px] font-bold text-white">Scan Library</span>
+                      <span class="text-[9px] font-mono text-emerald-300">Grid · Merge</span>
+                    </div>
+                    <!-- Grid of Scanned Docs -->
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                      <div class="p-2 rounded-xl bg-white/[0.05] border border-emerald-400/50 relative">
+                        <span class="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-emerald-400 text-zinc-950 text-[8px] font-bold flex items-center justify-center">1</span>
+                        <div class="h-16 bg-zinc-200/90 rounded-md mb-1.5"></div>
+                        <div class="text-[9px] text-white truncate">ID_Front.jpg</div>
+                      </div>
+                      <div class="p-2 rounded-xl bg-white/[0.05] border border-emerald-400/50 relative">
+                        <span class="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-emerald-400 text-zinc-950 text-[8px] font-bold flex items-center justify-center">2</span>
+                        <div class="h-16 bg-zinc-200/90 rounded-md mb-1.5"></div>
+                        <div class="text-[9px] text-white truncate">ID_Back.jpg</div>
+                      </div>
+                    </div>
+                    <!-- Print Service Active Banner -->
+                    <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25">
+                      <div class="text-[10px] font-semibold text-emerald-300">Android Print Service</div>
+                      <p class="text-[9px] text-zinc-400 mt-0.5">Active across Chrome, Drive &amp; Gmail even when closed.</p>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-1.5">
+                    <div class="py-2 rounded-xl bg-white/10 text-white text-center text-[10px] font-semibold">Merge 2-in-1</div>
+                    <div class="py-2 rounded-xl bg-emerald-400 text-zinc-950 text-center text-[10px] font-bold">Export PDF</div>
+                  </div>
+                </div>
+                <img
+                  data-primary="docs/screenshots/print_service_plugin.jpg"
+                  data-fallback="screenshots/print_service_plugin.jpg"
+                  src="docs/screenshots/print_service_plugin.jpg"
+                  alt="BrotherBridge Print Service and Library screenshot"
+                  class="smart-screenshot absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 z-10"
+                />
+              </div>
+            </div>
+            <div class="mt-4 px-1">
+              <h3 class="text-sm font-semibold text-white">4. Print Service &amp; Library</h3>
+              <p class="text-xs text-zinc-400 mt-0.5">Grid/Tiles/List view, merge &amp; PDF export.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 6. INTERACTIVE PRINTER & SCANNER COMPATIBILITY CHECKER                -->
+    <!-- ===================================================================== -->
+    <section id="compatibility" class="py-20 border-t border-white/[0.06]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mb-8">
+          <p class="text-xs font-mono uppercase tracking-widest text-sky-400 mb-2">Hardware Matrix</p>
+          <h2 class="text-2xl sm:text-4xl font-bold tracking-tight text-white">Check your Brother printer or scanner model.</h2>
+          <p class="mt-2.5 text-zinc-400 text-sm sm:text-base">
+            Instantly search supported and expected Brother laser printers and multifunction scanners powered by <code class="font-mono text-sky-300">brlaser</code> and <code class="font-mono text-orange-300">brscan4</code>.
+          </p>
+        </div>
+
+        <!-- Testing Notice Banner -->
+        <div class="mb-8 p-4 rounded-2xl bg-amber-500/[0.07] border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <p class="text-xs sm:text-sm text-amber-100/90 leading-relaxed">
+              <strong class="text-amber-300 font-semibold">Testing Notice:</strong> BrotherBridge was developed and verified primarily on the <span class="font-mono font-semibold text-white">Brother DCP-L2520D</span>. Other models below are expected to work based on <code class="font-mono">brlaser</code> and <code class="font-mono">brscan4</code> driver support.
+            </p>
+          </div>
+          <a href="#github-repo" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-400/15 border border-amber-400/30 text-amber-200 hover:bg-amber-400/25 text-xs font-semibold whitespace-nowrap transition-colors">
+            Report Your Model →
+          </a>
+        </div>
+
+        <!-- Search Input + Filter Pills -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+          <!-- Search Bar -->
+          <div class="relative flex-1 max-w-md">
+            <svg class="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input
+              id="model-search"
+              type="text"
+              placeholder="Search model (e.g. DCP-L2520D, HL-L2320D, MFC-L2700DW)..."
+              class="w-full pl-10 pr-9 py-2.5 rounded-xl bg-white/[0.04] border border-white/12 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-sky-400/70 focus:ring-2 focus:ring-sky-400/20 transition-all"
+            />
+            <button id="clear-search" type="button" aria-label="Clear search" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+
+          <!-- Filter Pills + Counter -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" data-filter="all" class="compat-filter px-3.5 py-2 rounded-xl text-xs font-medium bg-white text-zinc-950 transition-all">All</button>
+            <button type="button" data-filter="verified" class="compat-filter px-3.5 py-2 rounded-xl text-xs font-medium bg-white/[0.04] text-zinc-300 border border-white/10 hover:bg-white/[0.08] transition-all">Verified</button>
+            <button type="button" data-filter="full" class="compat-filter px-3.5 py-2 rounded-xl text-xs font-medium bg-white/[0.04] text-zinc-300 border border-white/10 hover:bg-white/[0.08] transition-all">Full Print + Scan</button>
+            <button type="button" data-filter="print-only" class="compat-filter px-3.5 py-2 rounded-xl text-xs font-medium bg-white/[0.04] text-zinc-300 border border-white/10 hover:bg-white/[0.08] transition-all">Print-Only</button>
+            <button type="button" data-filter="scan-only" class="compat-filter px-3.5 py-2 rounded-xl text-xs font-medium bg-white/[0.04] text-zinc-300 border border-white/10 hover:bg-white/[0.08] transition-all">Scan-Only</button>
+            <span id="compat-count" class="ml-1 text-xs font-mono text-zinc-400"></span>
+          </div>
+        </div>
+
+        <!-- Compatibility Results Table -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto max-h-[460px] overflow-y-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="sticky top-0 z-10 bg-[#121216] border-b border-white/10 text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+                <tr>
+                  <th class="py-3.5 px-5">Model</th>
+                  <th class="py-3.5 px-4">Series / Category</th>
+                  <th class="py-3.5 px-4">Print (<span class="text-sky-400">brlaser</span>)</th>
+                  <th class="py-3.5 px-4">Scan (<span class="text-orange-400">brscan4</span>)</th>
+                  <th class="py-3.5 px-5">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="compat-tbody" class="divide-y divide-white/[0.06] text-sm">
+                <!-- Dynamically populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+          <!-- Empty Search State -->
+          <div id="compat-empty" class="hidden py-12 px-6 text-center">
+            <p class="text-zinc-300 font-medium">No exact model matched your search.</p>
+            <p class="text-xs text-zinc-500 mt-1">If your Brother USB laser uses <code class="font-mono text-sky-400">brlaser</code> or <code class="font-mono text-orange-400">brscan4</code>, it may still work—test it and open a GitHub Issue!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 7. INTERACTIVE SETUP GUIDE & LIVE COMMAND GENERATOR                   -->
+    <!-- ===================================================================== -->
+    <section id="setup" class="py-20 border-t border-white/[0.06] bg-white/[0.01]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mb-10">
+          <p class="text-xs font-mono uppercase tracking-widest text-emerald-400 mb-2">Quick Start &amp; Live Commands</p>
+          <h2 class="text-2xl sm:text-4xl font-bold tracking-tight text-white">Up and printing in 2 minutes.</h2>
+          <p class="mt-2.5 text-zinc-400 text-sm sm:text-base">
+            Enter your host Android phone's IP below to customize every setup URL, PowerShell one-liner, CUPS command, and `curl` scan workflow automatically.
+          </p>
+        </div>
+
+        <!-- Host Rules Callout (2-Column Warning Cards) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div class="rounded-2xl p-5 bg-orange-500/[0.06] border border-orange-500/25">
+            <div class="flex items-center gap-2.5 mb-2">
+              <span class="w-6 h-6 rounded-lg bg-orange-500/20 text-orange-300 font-mono text-xs font-bold flex items-center justify-center">1</span>
+              <h3 class="text-sm font-bold text-white">Active USB OTG Connection (Mandatory)</h3>
+            </div>
+            <p class="text-xs sm:text-sm text-zinc-300/90 leading-relaxed">
+              The host Android device must support <strong class="text-white">USB OTG</strong> and remain physically connected to the Brother printer/scanner via an OTG cable/adapter with Android USB permission granted.
+            </p>
+          </div>
+
+          <div class="rounded-2xl p-5 bg-amber-500/[0.06] border border-amber-500/25">
+            <div class="flex items-center gap-2.5 mb-2">
+              <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-300 font-mono text-xs font-bold flex items-center justify-center">2</span>
+              <h3 class="text-sm font-bold text-white">Unrestricted Background Battery</h3>
+            </div>
+            <p class="text-xs sm:text-sm text-zinc-300/90 leading-relaxed">
+              Disable Android Battery Optimization (<strong class="text-white">App Info → Battery → Unrestricted</strong>). On Xiaomi/MIUI, Samsung, OnePlus, Vivo, and Oppo, also lock BrotherBridge in Recent Apps for 24/7 uptime.
+            </p>
+          </div>
+        </div>
+
+        <!-- Pro Tip Strip -->
+        <div class="mb-10 px-4 py-3 rounded-xl bg-emerald-500/[0.07] border border-emerald-500/20 flex items-start sm:items-center gap-3 text-xs sm:text-sm text-emerald-100/90">
+          <span class="px-2 py-0.5 rounded bg-emerald-400/20 text-emerald-300 font-mono text-[11px] font-bold shrink-0">PRO TIP</span>
+          <span>Enable <strong class="text-white">Auto-Start Server on USB OTG</strong> in Settings, and optionally use a <strong class="text-white">USB OTG Power Y-Splitter / Powered Hub</strong> so your host phone stays continuously charged.</span>
+        </div>
+
+        <!-- Live Host IP & Port Input Bar -->
+        <div class="glass-card rounded-2xl p-4 sm:p-5 mb-6 border-sky-500/30 bg-sky-500/[0.03]">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="text-sm font-semibold text-white flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-sky-400 pulse-soft"></span>
+                Live Command Generator
+              </div>
+              <p class="text-xs text-zinc-400 mt-0.5">Type your Host phone's local IP address to update every command across this page.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+              <label class="flex items-center bg-[#09090b] border border-white/15 rounded-xl overflow-hidden focus-within:border-sky-400">
+                <span class="px-3 py-2 text-xs font-mono text-zinc-400 bg-white/[0.03] border-r border-white/10">Host IP</span>
+                <input id="host-ip-input" type="text" value="192.168.1.50" aria-label="Host IP Address" class="w-36 sm:w-40 px-3 py-2 bg-transparent text-sm font-mono text-sky-300 focus:outline-none" />
+              </label>
+              <label class="flex items-center bg-[#09090b] border border-white/15 rounded-xl overflow-hidden focus-within:border-sky-400">
+                <span class="px-3 py-2 text-xs font-mono text-zinc-400 bg-white/[0.03] border-r border-white/10">Port</span>
+                <input id="host-port-input" type="text" value="8631" aria-label="Host Port" class="w-20 px-3 py-2 bg-transparent text-sm font-mono text-emerald-300 focus:outline-none" />
+              </label>
+              <button id="reset-ip-btn" type="button" class="px-3 py-2 rounded-xl text-xs font-mono text-zinc-400 hover:text-white bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] transition-colors">
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- OS Setup Tabs -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+          <!-- Tab Buttons -->
+          <div class="flex overflow-x-auto border-b border-white/10 bg-white/[0.02] p-2 gap-1.5 no-scrollbar" role="tablist" aria-label="Platform Setup Tabs">
+            <button type="button" role="tab" data-tab="host" aria-selected="true" class="setup-tab px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-white text-zinc-950 transition-all">1. Host Phone (Android)</button>
+            <button type="button" role="tab" data-tab="windows" aria-selected="false" class="setup-tab px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all">Windows 10 / 11</button>
+            <button type="button" role="tab" data-tab="macos" aria-selected="false" class="setup-tab px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all">macOS</button>
+            <button type="button" role="tab" data-tab="linux" aria-selected="false" class="setup-tab px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all">Linux (CUPS)</button>
+            <button type="button" role="tab" data-tab="android-client" aria-selected="false" class="setup-tab px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all">Android Client</button>
+          </div>
+
+          <!-- Tab Panels -->
+          <div class="p-6 sm:p-8">
+
+            <!-- TAB 1: Host Phone (Android) -->
+            <div data-panel="host" class="setup-panel space-y-5">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-lg font-bold text-white">Set Up the Spare Android Host Server</h3>
+                <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">Android 7.0+ · USB OTG</span>
+              </div>
+              <ol class="space-y-3.5 text-sm text-zinc-300">
+                <li class="flex gap-3.5">
+                  <span class="w-6 h-6 rounded-full bg-white/10 text-white font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <span>Install <strong class="text-white">BrotherBridge</strong> on your spare Android device connected to your Wi-Fi or mobile hotspot.</span>
+                </li>
+                <li class="flex gap-3.5">
+                  <span class="w-6 h-6 rounded-full bg-white/10 text-white font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <span>Connect your USB-only Brother printer via the <strong class="text-white">USB OTG cable</strong> and tap <strong class="text-emerald-300">Allow</strong> on the Android USB permission prompt.</span>
+                </li>
+                <li class="flex gap-3.5">
+                  <span class="w-6 h-6 rounded-full bg-white/10 text-white font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <span>Open Android <strong class="text-white">App Info → Battery</strong> and set usage to <strong class="text-amber-300">Unrestricted</strong> for 24/7 background hosting.</span>
+                </li>
+                <li class="flex gap-3.5">
+                  <span class="w-6 h-6 rounded-full bg-white/10 text-white font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">4</span>
+                  <span>Tap <strong class="text-white">Server</strong> on the Home screen and toggle <strong class="text-emerald-300">Remote Server ON</strong> (or enable Auto-Start on USB OTG in Settings).</span>
+                </li>
+                <li class="flex gap-3.5">
+                  <span class="w-6 h-6 rounded-full bg-white/10 text-white font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">5</span>
+                  <span>Note your live IPP print endpoint &amp; verify reachability in any browser at <code class="font-mono text-sky-300">http://<span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span>/</code>:</span>
+                </li>
+              </ol>
+
+              <!-- Copyable IPP Endpoint Box -->
+              <div class="rounded-xl bg-[#09090b] border border-white/10 p-4 flex items-center justify-between gap-3">
+                <code class="text-xs sm:text-sm font-mono text-sky-300 break-all">http://<span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span>/ipp/print</code>
+                <button type="button" data-copy-target="ipp-url" class="copy-btn shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-medium text-zinc-200 transition-colors">
+                  Copy URL
+                </button>
+              </div>
+            </div>
+
+            <!-- TAB 2: Windows 10 / 11 -->
+            <div data-panel="windows" class="setup-panel hidden space-y-6">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-lg font-bold text-white">Wireless Printing on Windows 10 / 11</h3>
+                <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-sky-500/15 text-sky-300 border border-sky-500/25">Microsoft IPP Class Driver · Zero Brother Drivers</span>
+              </div>
+              <p class="text-sm text-zinc-400">
+                BrotherBridge natively supports IPP 2.0, HTTP chunked transfer decoding, <code class="font-mono text-zinc-200">Expect: 100-continue</code>, IEEE 1284 Device ID, and <code class="font-mono text-sky-300">image/pwg-raster</code> for Windows' built-in driver.
+              </p>
+
+              <!-- Fastest: PowerShell One-Liner -->
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-mono uppercase tracking-wider text-emerald-400">Fastest — One-Line PowerShell Setup</span>
+                  <button type="button" data-copy-target="win-ps" class="copy-btn inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-medium text-zinc-200 transition-colors">
+                    Copy Command
+                  </button>
+                </div>
+                <pre class="rounded-xl bg-[#09090b] border border-white/10 p-4 overflow-x-auto text-xs sm:text-sm font-mono text-sky-300"><code>Add-Printer -IppURL "http://<span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span>/ipp/print"</code></pre>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+                  <h4 class="text-sm font-semibold text-white mb-2">Option A — Automatic Discovery (mDNS)</h4>
+                  <ol class="space-y-1.5 text-xs sm:text-sm text-zinc-400 list-decimal list-inside">
+                    <li>Open <strong class="text-zinc-200">Settings → Bluetooth &amp; devices → Printers &amp; scanners → Add device</strong>.</li>
+                    <li>Wait a few seconds for <strong class="text-white">BrotherBridge</strong> to appear and click <strong class="text-sky-300">Add device</strong>.</li>
+                  </ol>
+                </div>
+                <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+                  <h4 class="text-sm font-semibold text-white mb-2">Option B — Manual URL (If mDNS Blocked)</h4>
+                  <ol class="space-y-1.5 text-xs sm:text-sm text-zinc-400 list-decimal list-inside">
+                    <li>Go to <strong class="text-zinc-200">Add device → Add manually → Select a shared printer by name</strong>.</li>
+                    <li>Paste <code class="font-mono text-sky-300">http://<span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span>/ipp/print</code>.</li>
+                    <li>If prompted, select <strong class="text-zinc-200">Microsoft → Microsoft IPP Class Driver</strong>.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: macOS -->
+            <div data-panel="macos" class="setup-panel hidden space-y-6">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-lg font-bold text-white">Wireless Printing on macOS</h3>
+                <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-sky-500/15 text-sky-300 border border-sky-500/25">Bonjour · AirPrint / Generic PDF</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+                  <h4 class="text-sm font-semibold text-white mb-2.5">Automatic (Bonjour)</h4>
+                  <ol class="space-y-2 text-xs sm:text-sm text-zinc-400 list-decimal list-inside">
+                    <li>Open <strong class="text-zinc-200">System Settings → Printers &amp; Scanners → Add Printer</strong>.</li>
+                    <li>Select <strong class="text-white">BrotherBridge</strong> under the <strong class="text-zinc-200">Default</strong> tab.</li>
+                    <li>Keep <strong class="text-zinc-200">Use: AirPrint / Generic PDF Printer</strong> and click <strong class="text-sky-300">Add</strong>.</li>
+                  </ol>
+                </div>
+
+                <div class="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+                  <div class="flex items-center justify-between mb-2.5">
+                    <h4 class="text-sm font-semibold text-white">Manual (IP Tab)</h4>
+                    <button type="button" data-copy-target="macos-addr" class="copy-btn px-2.5 py-1 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-[11px] text-zinc-200">Copy Address</button>
+                  </div>
+                  <ul class="space-y-2 text-xs sm:text-sm font-mono text-zinc-300">
+                    <li><span class="text-zinc-500">Protocol:</span> Internet Printing Protocol - IPP</li>
+                    <li><span class="text-zinc-500">Address:</span> <span class="text-sky-300"><span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span></span></li>
+                    <li><span class="text-zinc-500">Queue:</span> <span class="text-emerald-300">ipp/print</span></li>
+                    <li><span class="text-zinc-500">Use:</span> Generic PDF Printer</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 4: Linux (CUPS) -->
+            <div data-panel="linux" class="setup-panel hidden space-y-5">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-lg font-bold text-white">Wireless Printing on Linux (CUPS)</h3>
+                <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-sky-500/15 text-sky-300 border border-sky-500/25">IPP Everywhere · Avahi</span>
+              </div>
+              <p class="text-sm text-zinc-400">
+                Open <strong class="text-zinc-200">Settings → Printers → Add</strong> for automatic Avahi/CUPS <code class="font-mono text-zinc-200">_ipp._tcp</code> discovery, or register instantly from your terminal:
+              </p>
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-mono uppercase tracking-wider text-emerald-400">CUPS CLI One-Liner (or http://localhost:631)</span>
+                  <button type="button" data-copy-target="linux-cups" class="copy-btn inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-medium text-zinc-200 transition-colors">
+                    Copy Command
+                  </button>
+                </div>
+                <pre class="rounded-xl bg-[#09090b] border border-white/10 p-4 overflow-x-auto text-xs sm:text-sm font-mono text-emerald-300"><code>lpadmin -p BrotherBridge -E -v ipp://<span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span>/ipp/print -m everywhere</code></pre>
+              </div>
+            </div>
+
+            <!-- TAB 5: Android Client -->
+            <div data-panel="android-client" class="setup-panel hidden space-y-5">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-lg font-bold text-white">Connect Wirelessly from Another Android Phone</h3>
+                <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">Print + 2400 DPI Scan + System Plugin</span>
+              </div>
+              <ol class="space-y-3.5 text-sm text-zinc-300">
+                <li class="flex gap-3.5">
+                  <span class="w-6 h-6 rounded-full bg-white/10 text-white font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <span>Install <strong class="text-white">BrotherBridge</strong> on your daily Android phone or tablet on the same Wi-Fi / Hotspot.</span>
+                </li>
+                <li class="flex gap-3.5">
+                  <span class="w-6 h-6 rounded-full bg-white/10 text-white font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <span>Tap <strong class="text-emerald-300">Scan for Printers</strong> on Home for automatic mDNS/UDP discovery—or tap <strong class="text-white">3-dot menu → Add IP Manually!</strong> and enter <code class="font-mono text-sky-300"><span class="live-ip">192.168.1.50</span></code> and port <code class="font-mono text-emerald-300"><span class="live-port">8631</span></code>.</span>
+                </li>
+                <li class="flex gap-3.5">
+                  <span class="w-6 h-6 rounded-full bg-white/10 text-white font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <span>Print or scan at up to 2400 DPI right inside the app, or enable <strong class="text-white">BrotherBridge</strong> in Android <strong class="text-emerald-300">Settings → Printing</strong> to print from Chrome, Drive, Gmail, Photos, and Files (stays connected even after closing BrotherBridge).</span>
+                </li>
+              </ol>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 8. DEVELOPER HTTP SCAN API SECTION                                    -->
+    <!-- ===================================================================== -->
+    <section id="api" class="py-20 border-t border-white/[0.06]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+          <div class="max-w-2xl">
+            <p class="text-xs font-mono uppercase tracking-widest text-orange-400 mb-2">Developer Integration</p>
+            <h2 class="text-2xl sm:text-4xl font-bold tracking-tight text-white">Asynchronous HTTP/JSON Scan API.</h2>
+            <p class="mt-2.5 text-zinc-400 text-sm sm:text-base">
+              Build desktop tools or shell scripts directly against port <code class="font-mono text-emerald-300 live-port">8631</code>. Features queued jobs, <code class="font-mono text-orange-300">X-Scan-Sha256</code> integrity headers, and automatic recovery for unacknowledged scans.
+            </p>
+          </div>
+          <!-- Companion PC Client Card -->
+          <a href="https://github.com/withsim99/BrotherBridge-PC-Client" target="_blank" rel="noopener noreferrer" class="glass-card rounded-xl p-4 flex items-center gap-3.5 border-orange-500/25 hover:border-orange-400/50 transition-all shrink-0">
+            <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            </div>
+            <div>
+              <div class="text-xs font-mono text-orange-300">Companion Desktop Client</div>
+              <div class="text-sm font-semibold text-white">@withsim99/BrotherBridge-PC-Client ↗</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- 8 Endpoints Reference Table -->
+        <div class="glass-card rounded-2xl overflow-hidden mb-8">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-[#121216] border-b border-white/10 text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+                <tr>
+                  <th class="py-3.5 px-5 w-24">Method</th>
+                  <th class="py-3.5 px-4">Endpoint</th>
+                  <th class="py-3.5 px-5">Description</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/[0.06] text-xs sm:text-sm">
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="py-3 px-5"><span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">GET</span></td>
+                  <td class="py-3 px-4 font-mono text-zinc-100">/api/status</td>
+                  <td class="py-3 px-5 text-zinc-400">Check USB OTG connection, model name, toner/drum/paper health, and server status</td>
+                </tr>
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="py-3 px-5"><span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">GET</span></td>
+                  <td class="py-3 px-4 font-mono text-zinc-100">/api/scan/capabilities</td>
+                  <td class="py-3 px-5 text-zinc-400">Query scanner availability, busy state, flatbed/ADF support, and model</td>
+                </tr>
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="py-3 px-5"><span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/25">POST</span></td>
+                  <td class="py-3 px-4 font-mono text-zinc-100">/api/scan/start</td>
+                  <td class="py-3 px-5 text-zinc-400">Start (or queue) a scan job; returns HTTP <code class="font-mono text-sky-300">202</code> with a <code class="font-mono text-zinc-200">jobId</code></td>
+                </tr>
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="py-3 px-5"><span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">GET</span></td>
+                  <td class="py-3 px-4 font-mono text-zinc-100">/api/scan/jobs/&lt;jobId&gt;/progress?deviceId=&lt;id&gt;</td>
+                  <td class="py-3 px-5 text-zinc-400">Poll job status (<code class="font-mono text-zinc-300">QUEUED → RUNNING → READY / FAILED / CANCELED</code>) and page metadata</td>
+                </tr>
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="py-3 px-5"><span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">GET</span></td>
+                  <td class="py-3 px-4 font-mono text-zinc-100">/api/scan/jobs/&lt;jobId&gt;/page/&lt;index&gt;?deviceId=&lt;id&gt;</td>
+                  <td class="py-3 px-5 text-zinc-400">Download scanned page (<code class="font-mono text-zinc-300">image/jpeg</code>) with <code class="font-mono text-orange-300">X-Scan-Sha256</code> &amp; <code class="font-mono text-zinc-300">X-Scan-Size-Bytes</code></td>
+                </tr>
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="py-3 px-5"><span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/25">POST</span></td>
+                  <td class="py-3 px-4 font-mono text-zinc-100">/api/scan/jobs/&lt;jobId&gt;/ack</td>
+                  <td class="py-3 px-5 text-zinc-400">Acknowledge verified receipt (<code class="font-mono text-zinc-300">sha256</code> + <code class="font-mono text-zinc-300">receivedBytes</code>) to clear the host vault copy</td>
+                </tr>
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="py-3 px-5"><span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">GET</span></td>
+                  <td class="py-3 px-4 font-mono text-zinc-100">/api/scan/pending?deviceId=&lt;id&gt;</td>
+                  <td class="py-3 px-5 text-zinc-400">Recover any completed but unacknowledged scans after a network disconnect</td>
+                </tr>
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="py-3 px-5"><span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/25">POST</span></td>
+                  <td class="py-3 px-4 font-mono text-zinc-100">/api/scan/jobs/&lt;jobId&gt;/cancel</td>
+                  <td class="py-3 px-5 text-zinc-400">Cancel an active or queued scan job immediately</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Syntax-Highlighted 4-Step curl Workflow -->
+        <div class="rounded-2xl bg-[#0c0c10] border border-white/12 overflow-hidden shadow-2xl">
+          <div class="flex items-center justify-between px-4 py-3 bg-white/[0.03] border-b border-white/[0.08]">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500/70"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500/70"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/70"></span>
+              <span class="ml-2 text-xs font-mono text-zinc-400">scan_workflow.sh — Live IP Synced</span>
+            </div>
+            <button type="button" data-copy-target="curl-workflow" class="copy-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-medium text-zinc-200 transition-colors">
+              Copy Workflow
+            </button>
+          </div>
+          <pre class="p-5 overflow-x-auto text-xs sm:text-[13px] leading-relaxed font-mono text-zinc-300"><code><span class="text-zinc-500"># 1. Start a 300 DPI color flatbed scan (returns JSON with "jobId")</span>
+<span class="text-sky-400">curl</span> -X <span class="text-amber-300">POST</span> <span class="text-emerald-300">"http://<span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span>/api/scan/start"</span> \
+  -H <span class="text-emerald-300">"Content-Type: application/json"</span> \
+  -d <span class="text-orange-200">'{
+    "deviceId": "my_pc_01",
+    "clientName": "My PC",
+    "source": "FLATBED",
+    "colorMode": "COLOR",
+    "dpi": 300,
+    "pageSize": "A4",
+    "brightness": 50,
+    "contrast": 50
+  }'</span>
+
+<span class="text-zinc-500"># 2. Poll progress until status is "READY"</span>
+<span class="text-sky-400">curl</span> <span class="text-emerald-300">"http://<span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span>/api/scan/jobs/&lt;JOB_ID&gt;/progress?deviceId=my_pc_01"</span>
+
+<span class="text-zinc-500"># 3. Download page 1 as JPEG (returns X-Scan-Sha256 header)</span>
+<span class="text-sky-400">curl</span> <span class="text-emerald-300">"http://<span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span>/api/scan/jobs/&lt;JOB_ID&gt;/page/1?deviceId=my_pc_01"</span> \
+  --output scanned_page_1.jpg
+
+<span class="text-zinc-500"># 4. Acknowledge verified receipt (cleans up the host vault copy)</span>
+<span class="text-sky-400">curl</span> -X <span class="text-amber-300">POST</span> <span class="text-emerald-300">"http://<span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span>/api/scan/jobs/&lt;JOB_ID&gt;/ack"</span> \
+  -H <span class="text-emerald-300">"Content-Type: application/json"</span> \
+  -d <span class="text-orange-200">'{
+    "deviceId": "my_pc_01",
+    "pageIndex": 1,
+    "sha256": "&lt;SHA256_OF_SCANNED_PAGE_1&gt;",
+    "receivedBytes": 123456
+  }'</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 9. TROUBLESHOOTING ACCORDION                                          -->
+    <!-- ===================================================================== -->
+    <section id="faq" class="py-20 border-t border-white/[0.06] bg-white/[0.01]">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-10 text-center">
+          <p class="text-xs font-mono uppercase tracking-widest text-sky-400 mb-2">Troubleshooting &amp; FAQ</p>
+          <h2 class="text-2xl sm:text-4xl font-bold tracking-tight text-white">Common edge cases, solved.</h2>
+        </div>
+
+        <div class="space-y-3">
+          <!-- FAQ 1 -->
+          <div class="accordion-item glass-card rounded-2xl overflow-hidden" data-open="true">
+            <button type="button" class="accordion-trigger w-full flex items-center justify-between gap-4 p-5 text-left focus:outline-none">
+              <span class="text-sm sm:text-base font-semibold text-white">Remote Server won't start on the host phone?</span>
+              <svg class="accordion-chevron w-5 h-5 text-zinc-400 shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content">
+              <div class="overflow-hidden">
+                <div class="px-5 pb-5 text-sm text-zinc-400 leading-relaxed border-t border-white/[0.06] pt-4">
+                  Verify two requirements: (1) your Brother printer is powered on and physically connected via a working <strong class="text-zinc-200">USB OTG cable</strong> with Android USB permission granted, and (2) <strong class="text-zinc-200">Unrestricted Background Battery Usage</strong> is enabled in Android <em>App Info → Battery</em>.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="accordion-item glass-card rounded-2xl overflow-hidden" data-open="false">
+            <button type="button" class="accordion-trigger w-full flex items-center justify-between gap-4 p-5 text-left focus:outline-none">
+              <span class="text-sm sm:text-base font-semibold text-white">Server stops when the host phone's screen turns off?</span>
+              <svg class="accordion-chevron w-5 h-5 text-zinc-400 shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content">
+              <div class="overflow-hidden">
+                <div class="px-5 pb-5 text-sm text-zinc-400 leading-relaxed border-t border-white/[0.06] pt-4">
+                  Some Android OEMs (<strong class="text-zinc-200">Xiaomi/MIUI, Samsung, OnePlus, Vivo, Oppo</strong>) enforce aggressive background process limits. In addition to setting Battery to <strong class="text-zinc-200">Unrestricted</strong>, lock BrotherBridge in Recent Apps and disable <em>"Pause app activity if unused"</em> in App Info.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="accordion-item glass-card rounded-2xl overflow-hidden" data-open="false">
+            <button type="button" class="accordion-trigger w-full flex items-center justify-between gap-4 p-5 text-left focus:outline-none">
+              <span class="text-sm sm:text-base font-semibold text-white">Windows or mobile doesn't auto-discover the printer via mDNS?</span>
+              <svg class="accordion-chevron w-5 h-5 text-zinc-400 shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content">
+              <div class="overflow-hidden">
+                <div class="px-5 pb-5 text-sm text-zinc-400 leading-relaxed border-t border-white/[0.06] pt-4">
+                  Many Wi-Fi routers and mobile hotspots block multicast traffic (AP Isolation or cross-band 2.4 GHz / 5 GHz isolation). Bypass discovery completely by adding the printer manually using <code class="font-mono text-sky-300">http://<span class="live-ip">192.168.1.50</span>:<span class="live-port">8631</span>/ipp/print</code> on PC or <strong class="text-zinc-200">Add IP Manually!</strong> in the Android client.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="accordion-item glass-card rounded-2xl overflow-hidden" data-open="false">
+            <button type="button" class="accordion-trigger w-full flex items-center justify-between gap-4 p-5 text-left focus:outline-none">
+              <span class="text-sm sm:text-base font-semibold text-white">Wireless Android Print Service Plugin shows disconnected?</span>
+              <svg class="accordion-chevron w-5 h-5 text-zinc-400 shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-content">
+              <div class="overflow-hidden">
+                <div class="px-5 pb-5 text-sm text-zinc-400 leading-relaxed border-t border-white/[0.06] pt-4">
+                  Confirm the Host phone is still online on the same Wi-Fi network with the Remote Server running. BrotherBridge intentionally keeps the Android Print Service plugin connected even after you close the app, and only disconnects automatically if the host goes offline or you manually choose <strong class="text-zinc-200">3-dot menu → Disconnect Device</strong>.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 10. FINAL VIRAL CTA BANNER & FOOTER                                   -->
+    <!-- ===================================================================== -->
+    <section id="github-repo" class="py-20 border-t border-white/[0.06] relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-b from-sky-500/[0.04] via-emerald-500/[0.04] to-transparent pointer-events-none"></div>
+      <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="glass-card rounded-3xl p-8 sm:p-12 border-white/15 bg-[#111114]/90">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xs font-mono text-emerald-300 mb-5">
+            Free · Open Source · Zero E-Waste
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Save a great printer from the landfill.<br class="hidden sm:inline" /> Star BrotherBridge on GitHub.
+          </h2>
+          <p class="mt-4 text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto">
+            Tested BrotherBridge on another Brother printer or scanner? Open an Issue or Pull Request with your model number so the community compatibility matrix grows for everyone.
+          </p>
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-3.5">
+            <a href="https://github.com/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-white text-zinc-950 font-bold text-sm sm:text-base hover:bg-zinc-200 transition-all shadow-xl shadow-white/10">
+              <svg class="w-4 h-4 text-amber-500 fill-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <span>Star on GitHub</span>
+            </a>
+            <a href="#compatibility" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/[0.05] text-white font-semibold text-sm sm:text-base border border-white/12 hover:bg-white/[0.1] transition-all">
+              Submit Model Report
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/[0.08] py-12 bg-[#070709]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-white/[0.07]">
+        <!-- Brand & License -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="font-bold text-white">BrotherBridge</span>
+            <span class="px-2 py-0.5 text-[11px] font-mono rounded-full bg-white/[0.06] text-zinc-300">v1.9.0</span>
+          </div>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Licensed under the <strong class="text-zinc-200">GNU General Public License v2.0 (GPL-2.0)</strong>. Built to keep reliable USB-only printers working for years to come.
+          </p>
+        </div>
+
+        <!-- Attributions -->
+        <div>
+          <h4 class="text-xs font-mono uppercase tracking-wider text-zinc-300 mb-3">Third-Party Attributions</h4>
+          <ul class="space-y-2 text-xs text-zinc-400">
+            <li>
+              <strong class="text-sky-300 font-mono">brlaser</strong> — Kotlin port adapted from <a href="https://github.com/pdewacht/brlaser" target="_blank" rel="noopener noreferrer" class="text-zinc-200 underline decoration-white/30 hover:text-white">pdewacht/brlaser</a> (GPL-2.0-or-later).
+            </li>
+            <li>
+              <strong class="text-orange-300 font-mono">brscan4</strong> — Ported from open-source Brother SANE <code class="font-mono text-zinc-300">brscan4</code> C implementations (GPL-2.0).
+            </li>
+          </ul>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="text-xs font-mono uppercase tracking-wider text-zinc-300 mb-3">Navigation</h4>
+          <div class="grid grid-cols-2 gap-2 text-xs text-zinc-400">
+            <a href="#features" class="hover:text-white transition-colors">Features</a>
+            <a href="#architecture" class="hover:text-white transition-colors">Architecture</a>
+            <a href="#compatibility" class="hover:text-white transition-colors">Compatibility</a>
+            <a href="#setup" class="hover:text-white transition-colors">Setup Guide</a>
+            <a href="#api" class="hover:text-white transition-colors">HTTP Scan API</a>
+            <a href="#faq" class="hover:text-white transition-colors">Troubleshooting</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[11px] text-zinc-500">
+        <p>
+          Disclaimer: BrotherBridge is an independent open-source project and is not affiliated with, endorsed by, or supported by Brother Industries, Ltd. All product names and trademarks belong to their respective owners.
+        </p>
+        <p class="font-mono shrink-0">GPL-2.0 Open Source</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- INTERACTIVE VANILLA JAVASCRIPT                                        -->
+  <!-- ===================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* -------------------------------------------------------------------
+       * 1. Toast Notification & Clipboard Helper (iFrame-safe)
+       * ------------------------------------------------------------------- */
+      let toastTimer = null;
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        const msgEl = document.getElementById('toast-message');
+        if (!toast || !msgEl) return;
+        msgEl.textContent = message;
+        toast.classList.remove('opacity-0', 'translate-y-3');
+        toast.classList.add('opacity-100', 'translate-y-0');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-y-3');
+          toast.classList.remove('opacity-100', 'translate-y-0');
+        }, 2200);
+      }
+
+      function copyToClipboard(text, buttonEl) {
+        try {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', '');
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          showToast('Copied to clipboard');
+
+          if (buttonEl) {
+            const originalText = buttonEl.dataset.origText || buttonEl.textContent;
+            buttonEl.dataset.origText = originalText;
+            buttonEl.textContent = 'Copied!';
+            buttonEl.classList.add('text-emerald-300', 'border-emerald-500/40');
+            setTimeout(() => {
+              buttonEl.textContent = originalText;
+              buttonEl.classList.remove('text-emerald-300', 'border-emerald-500/40');
+            }, 1600);
+          }
+        } catch (err) {
+          showToast('Press Ctrl+C to copy');
+        }
+      }
+
+      /* -------------------------------------------------------------------
+       * 2. Mobile Navigation Toggle
+       * ------------------------------------------------------------------- */
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const iconOpen = document.getElementById('menu-icon-open');
+      const iconClose = document.getElementById('menu-icon-close');
+
+      if (mobileBtn && mobileMenu) {
+        const toggleMenu = (forceClose = false) => {
+          const isHidden = mobileMenu.classList.contains('hidden');
+          const shouldOpen = forceClose ? false : isHidden;
+          mobileMenu.classList.toggle('hidden', !shouldOpen);
+          iconOpen.classList.toggle('hidden', shouldOpen);
+          iconClose.classList.toggle('hidden', !shouldOpen);
+          mobileBtn.setAttribute('aria-expanded', String(shouldOpen));
+        };
+
+        mobileBtn.addEventListener('click', () => toggleMenu());
+        document.querySelectorAll('.mobile-nav-link').forEach((link) => {
+          link.addEventListener('click', () => toggleMenu(true));
+        });
+      }
+
+      /* -------------------------------------------------------------------
+       * 3. Interactive Architecture Client Inspector
+       * ------------------------------------------------------------------- */
+      const archDetails = {
+        ipp: {
+          title: 'Windows 10/11, macOS, Linux, iOS — Native IPP 2.0',
+          badge: 'PORT 8631 · /ipp/print',
+          desc: 'Auto-discovered via Bonjour/mDNS (_ipp._tcp) or manual URL. Supports application/pdf, image/pwg-raster (Windows Microsoft IPP Class Driver), HTTP chunked decoding, and Expect: 100-continue with zero proprietary drivers.',
+          cta: 'Jump to PC Setup →',
+          href: '#setup',
+        },
+        android: {
+          title: 'Android Client — BrotherBridge App + Persistent Print Service',
+          badge: 'mDNS / UDP / IP · 2400 DPI',
+          desc: 'Print from Chrome, Drive, Gmail, Photos, and Files with a persistent PrintService plugin that stays connected after closing the app. Includes wireless 2400 DPI scanning, 4-corner perspective crop, 2-in-1 page merge, and PDF export.',
+          cta: 'Android Client Setup →',
+          href: '#setup',
+        },
+        api: {
+          title: 'PC Client & Scripts — Asynchronous HTTP/JSON Scan API',
+          badge: 'REST API · SHA-256 VERIFIED',
+          desc: 'Trigger scans remotely via POST /api/scan/start, poll job progress, download JPEGs with X-Scan-Sha256 verification headers, and automatically recover unacknowledged scans after any Wi-Fi drop.',
+          cta: 'Explore Scan API →',
+          href: '#api',
+        },
+      };
+
+      const clientNodes = document.querySelectorAll('.client-node');
+      const archTitle = document.getElementById('arch-title');
+      const archBadge = document.getElementById('arch-badge');
+      const archDesc = document.getElementById('arch-desc');
+      const archCta = document.getElementById('arch-cta');
+
+      function selectArchClient(key) {
+        const info = archDetails[key];
+        if (!info) return;
+        clientNodes.forEach((node) => {
+          node.dataset.active = node.dataset.client === key ? 'true' : 'false';
+        });
+        archTitle.textContent = info.title;
+        archBadge.textContent = info.badge;
+        archDesc.textContent = info.desc;
+        archCta.textContent = info.cta;
+        archCta.setAttribute('href', info.href);
+      }
+
+      clientNodes.forEach((node) => {
+        node.addEventListener('click', () => selectArchClient(node.dataset.client));
+        node.addEventListener('mouseenter', () => selectArchClient(node.dataset.client));
+      });
+
+      /* -------------------------------------------------------------------
+       * 4. Smart Screenshot Progressive Image Loader (Zero Broken Images)
+       * ------------------------------------------------------------------- */
+      document.querySelectorAll('.smart-screenshot').forEach((img) => {
+        img.addEventListener('load', () => {
+          if (img.naturalWidth > 0) {
+            img.classList.remove('opacity-0');
+            img.classList.add('opacity-100');
+          }
+        });
+        img.addEventListener('error', () => {
+          if (!img.dataset.triedFallback && img.dataset.fallback) {
+            img.dataset.triedFallback = 'true';
+            img.src = img.dataset.fallback;
+          } else {
+            img.classList.add('hidden');
+          }
+        });
+        // Handle cached images that already completed before listeners attached
+        if (img.complete && img.naturalWidth > 0) {
+          img.classList.remove('opacity-0');
+          img.classList.add('opacity-100');
+        }
+      });
+
+      /* -------------------------------------------------------------------
+       * 5. Interactive Printer & Scanner Compatibility Matrix
+       * ------------------------------------------------------------------- */
+      const compatibilityData = [
+        // Verified
+        { model: 'DCP-L2520D', series: 'DCP-L2500 Series', print: 'Tested', scan: 'Tested', cat: 'verified', notes: 'Primary development & verified test device' },
+
+        // Expected Full (Print + Scan)
+        ...['DCP-L2500D', 'DCP-L2510D', 'DCP-L2520DW', 'DCP-L2540DW', 'DCP-L2550DW'].map((m) => ({
+          model: m, series: 'DCP-L2500 Series', print: 'Expected', scan: 'Expected', cat: 'full', notes: 'Multifunction monochrome laser (brlaser + brscan4)'
+        })),
+        ...['DCP-1510', 'DCP-1512', 'DCP-1600', 'DCP-1610W'].map((m) => ({
+          model: m, series: 'DCP-1500 / 1600 Series', print: 'Expected', scan: 'Expected', cat: 'full', notes: 'Multifunction monochrome laser (brlaser + brscan4)'
+        })),
+        ...['DCP-7055', 'DCP-7055W', 'DCP-7060D', 'DCP-7065DN', 'DCP-7070DW', 'DCP-7080'].map((m) => ({
+          model: m, series: 'DCP-7055–7080 Series', print: 'Expected', scan: 'Expected', cat: 'full', notes: 'Multifunction monochrome laser (brlaser + brscan4)'
+        })),
+        ...['MFC-1810', 'MFC-1815', 'MFC-1910W'].map((m) => ({
+          model: m, series: 'MFC-1800 / 1900 Series', print: 'Expected', scan: 'Expected', cat: 'full', notes: 'Multifunction monochrome laser (brlaser + brscan4)'
+        })),
+        ...['MFC-7240', 'MFC-7360N', 'MFC-7365DN', 'MFC-7460DN', 'MFC-7860DW'].map((m) => ({
+          model: m, series: 'MFC-7000 Series', print: 'Expected', scan: 'Expected', cat: 'full', notes: 'Multifunction monochrome laser (brlaser + brscan4)'
+        })),
+        ...['MFC-L2700DN', 'MFC-L2700DW', 'MFC-L2710DN', 'MFC-L2710DW', 'MFC-L2750DW'].map((m) => ({
+          model: m, series: 'MFC-L2700 Series', print: 'Expected', scan: 'Expected', cat: 'full', notes: 'Multifunction monochrome laser (brlaser + brscan4)'
+        })),
+
+        // Expected Print-Only (HL Laser)
+        ...['HL-1110', 'HL-1200', 'HL-2030', 'HL-2130', 'HL-2140', 'HL-2220', 'HL-2240D', 'HL-2270DW', 'HL-5030', 'HL-L2300D', 'HL-L2320D', 'HL-L2340D', 'HL-L2360D', 'HL-L2375DW', 'HL-L2390DW'].map((m) => ({
+          model: m, series: 'Brother HL Laser Printers', print: 'Expected', scan: 'N/A', cat: 'print-only', notes: 'Single-function printer (Scan button hides automatically)'
+        })),
+
+        // Expected Print-Only (Older brscan3 MFPs)
+        ...['DCP-7030', 'DCP-7040', 'MFC-7320', 'MFC-7340', 'MFC-7420', 'MFC-7440N'].map((m) => ({
+          model: m, series: 'Older brscan3 MFPs', print: 'Expected', scan: 'Unsupported', cat: 'print-only', notes: 'Printing uses brlaser; scanning requires brscan3'
+        })),
+
+        // Expected Scan-Only (brscan4 Inkjet/Color)
+        ...['DCP-T Series', 'DCP-J Series', 'MFC-J Series'].map((m) => ({
+          model: m, series: 'brscan4 Inkjet / Color MFPs', print: 'Unsupported', scan: 'Expected', cat: 'scan-only', notes: 'brlaser supports monochrome lasers only; USB scan may work'
+        })),
+      ];
+
+      function renderStatusBadge(status) {
+        switch (status) {
+          case 'Tested':
+            return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">✓ Tested</span>';
+          case 'Expected':
+            return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-amber-500/15 text-amber-300 border border-amber-500/25">● Expected</span>';
+          case 'N/A':
+            return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono text-zinc-400 bg-white/[0.04] border border-white/10">— N/A</span>';
+          default:
+            return '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono text-rose-300 bg-rose-500/10 border border-rose-500/25">✕ Unsupported</span>';
+        }
+      }
+
+      const tbody = document.getElementById('compat-tbody');
+      const emptyState = document.getElementById('compat-empty');
+      const countEl = document.getElementById('compat-count');
+      const searchInput = document.getElementById('model-search');
+      const clearSearchBtn = document.getElementById('clear-search');
+      const filterBtns = document.querySelectorAll('.compat-filter');
+
+      let activeFilter = 'all';
+
+      function renderCompatibilityTable() {
+        const query = (searchInput.value || '').trim().toLowerCase();
+        clearSearchBtn.classList.toggle('hidden', query.length === 0);
+
+        const filtered = compatibilityData.filter((row) => {
+          const matchesFilter =
+            activeFilter === 'all' ||
+            (activeFilter === 'verified' && row.cat === 'verified') ||
+            (activeFilter === 'full' && (row.cat === 'full' || row.cat === 'verified')) ||
+            (activeFilter === 'print-only' && row.cat === 'print-only') ||
+            (activeFilter === 'scan-only' && row.cat === 'scan-only');
+
+          if (!matchesFilter) return false;
+          if (!query) return true;
+
+          return (
+            row.model.toLowerCase().includes(query) ||
+            row.series.toLowerCase().includes(query) ||
+            row.notes.toLowerCase().includes(query)
+          );
+        });
+
+        countEl.textContent = `${filtered.length} of ${compatibilityData.length} models`;
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = '';
+          emptyState.classList.remove('hidden');
+          return;
+        }
+
+        emptyState.classList.add('hidden');
+        tbody.innerHTML = filtered
+          .map((row) => {
+            const isVerified = row.cat === 'verified';
+            return `
+              <tr class="${isVerified ? 'bg-emerald-500/[0.05]' : 'hover:bg-white/[0.02]'} transition-colors">
+                <td class="py-3 px-5 font-mono font-semibold ${isVerified ? 'text-emerald-300' : 'text-white'} whitespace-nowrap">
+                  Brother ${row.model}
+                </td>
+                <td class="py-3 px-4 text-xs text-zinc-400 whitespace-nowrap">${row.series}</td>
+                <td class="py-3 px-4 whitespace-nowrap">${renderStatusBadge(row.print)}</td>
+                <td class="py-3 px-4 whitespace-nowrap">${renderStatusBadge(row.scan)}</td>
+                <td class="py-3 px-5 text-xs text-zinc-400">${row.notes}</td>
+              </tr>
+            `;
+          })
+          .join('');
+      }
+
+      filterBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          activeFilter = btn.dataset.filter;
+          filterBtns.forEach((b) => {
+            const selected = b.dataset.filter === activeFilter;
+            b.className = selected
+              ? 'compat-filter px-3.5 py-2 rounded-xl text-xs font-medium bg-white text-zinc-950 transition-all'
+              : 'compat-filter px-3.5 py-2 rounded-xl text-xs font-medium bg-white/[0.04] text-zinc-300 border border-white/10 hover:bg-white/[0.08] transition-all';
+          });
+          renderCompatibilityTable();
+        });
+      });
+
+      searchInput.addEventListener('input', renderCompatibilityTable);
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        renderCompatibilityTable();
+        searchInput.focus();
+      });
+
+      renderCompatibilityTable();
+
+      /* -------------------------------------------------------------------
+       * 6. Live Host IP & Port Command Generator + Copy Handlers
+       * ------------------------------------------------------------------- */
+      const ipInput = document.getElementById('host-ip-input');
+      const portInput = document.getElementById('host-port-input');
+      const resetIpBtn = document.getElementById('reset-ip-btn');
+
+      function getLiveHost() {
+        const ip = (ipInput.value || '').trim().replace(/[^a-zA-Z0-9.\-:]/g, '') || '192.168.1.50';
+        const port = (portInput.value || '').trim().replace(/[^0-9]/g, '') || '8631';
+        return { ip, port };
+      }
+
+      function syncLiveHostValues() {
+        const { ip, port } = getLiveHost();
+        document.querySelectorAll('.live-ip').forEach((el) => { el.textContent = ip; });
+        document.querySelectorAll('.live-port').forEach((el) => { el.textContent = port; });
+      }
+
+      ipInput.addEventListener('input', syncLiveHostValues);
+      portInput.addEventListener('input', syncLiveHostValues);
+      resetIpBtn.addEventListener('click', () => {
+        ipInput.value = '192.168.1.50';
+        portInput.value = '8631';
+        syncLiveHostValues();
+        showToast('Reset to default 192.168.1.50:8631');
+      });
+
+      document.querySelectorAll('.copy-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const { ip, port } = getLiveHost();
+          const target = btn.dataset.copyTarget;
+          let text = '';
+
+          if (target === 'ipp-url') {
+            text = `http://${ip}:${port}/ipp/print`;
+          } else if (target === 'win-ps') {
+            text = `Add-Printer -IppURL "http://${ip}:${port}/ipp/print"`;
+          } else if (target === 'macos-addr') {
+            text = `${ip}:${port}`;
+          } else if (target === 'linux-cups') {
+            text = `lpadmin -p BrotherBridge -E -v ipp://${ip}:${port}/ipp/print -m everywhere`;
+          } else if (target === 'curl-workflow') {
+            text = `# 1. Start a 300 DPI color flatbed scan (returns JSON with "jobId")
+curl -X POST "http://${ip}:${port}/api/scan/start" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "deviceId": "my_pc_01",
+    "clientName": "My PC",
+    "source": "FLATBED",
+    "colorMode": "COLOR",
+    "dpi": 300,
+    "pageSize": "A4",
+    "brightness": 50,
+    "contrast": 50
+  }'
+
+# 2. Poll progress until status is "READY"
+curl "http://${ip}:${port}/api/scan/jobs/<JOB_ID>/progress?deviceId=my_pc_01"
+
+# 3. Download page 1 as JPEG
+curl "http://${ip}:${port}/api/scan/jobs/<JOB_ID>/page/1?deviceId=my_pc_01" \\
+  --output scanned_page_1.jpg
+
+# 4. Acknowledge verified receipt (cleans up the host vault copy)
+curl -X POST "http://${ip}:${port}/api/scan/jobs/<JOB_ID>/ack" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "deviceId": "my_pc_01",
+    "pageIndex": 1,
+    "sha256": "<SHA256_OF_SCANNED_PAGE_1>",
+    "receivedBytes": 123456
+  }'`;
+          }
+
+          if (text) copyToClipboard(text, btn);
+        });
+      });
+
+      /* -------------------------------------------------------------------
+       * 7. OS Setup Tabs
+       * ------------------------------------------------------------------- */
+      const setupTabs = document.querySelectorAll('.setup-tab');
+      const setupPanels = document.querySelectorAll('.setup-panel');
+
+      setupTabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const target = tab.dataset.tab;
+          setupTabs.forEach((t) => {
+            const active = t.dataset.tab === target;
+            t.setAttribute('aria-selected', String(active));
+            t.className = active
+              ? 'setup-tab px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-white text-zinc-950 transition-all'
+              : 'setup-tab px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all';
+          });
+          setupPanels.forEach((panel) => {
+            panel.classList.toggle('hidden', panel.dataset.panel !== target);
+          });
+        });
+      });
+
+      /* -------------------------------------------------------------------
+       * 8. FAQ Troubleshooting Accordion
+       * ------------------------------------------------------------------- */
+      document.querySelectorAll('.accordion-trigger').forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+          const item = trigger.closest('.accordion-item');
+          const isOpen = item.dataset.open === 'true';
+          item.dataset.open = isOpen ? 'false' : 'true';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
